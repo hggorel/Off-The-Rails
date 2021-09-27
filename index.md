@@ -1,26 +1,20 @@
-## Introduction To Game
+## Introduction
 
-Your heist on the queens crown was a success!  Now however, you need to get off the train with the crown and your life!  Dash through all the train cars to safety and the ultimate victory!
+Your heist for the queens crown was a success!  But you're not done yet, you need to get off the train with the crown and your life!  Dash through all the train cars to safety and the ultimate victory!
 
-## Team Bios
+## Meet The Team!
 
-- Hannah is a junior Computer Science and Mathematics double major.  Her favorite games are Eternal Sonata and the classics like Mario and Pokemon.
-Roles: Developer, Producer
-<img src="/assets/images/hannah_project.png" width="150" height="200">
-
-- Elise is a senior computer science and art history double major; she aims to, yet again, combine these two aspects of her life. She loves trains and is very excited about that specific aspect. Her fave games are mainly isometric CRPGs, but she’s very nostalgic for all farming sims.
-Roles: (Main) Animator, User Researcher, QA Tester 
-<img src="/assets/images/elise_project.jpg" width="150" height="200">
-
-- Alex is a senior Computer Science major, math and philosophy minor. Some absolute banger games are Monster Hunter, The Souls franchises and many other RPGs. 
-Roles: Level Designer, Publicist, QA tester  
-
-- Christian is a senior Computer Science major, with minors in Math and Philosophy.  He loves Rocket League and the Dark Souls series, but does not limit himself by a genre of video game.  
-Roles: QA Tester, (and whatever else he wants)
-<img src="/assets/images/christian_project.jpg" width="150" height="200">
+| Name | Bio | Roles |
+|----|---|---|
+|Hannah <img src="/assets/images/hannah_project.png" width="175" height="225"> | Junior Computer Science and Mathematics double major.  Her favorite games are Eternal Sonata and the classics like Mario and Pokemon | Developer, Producer|
+| Elise <img src="/assets/images/elise_project.jpg" width="175" height="225"> | Senior computer science and art history double major; she aims to, yet again, combine these two aspects of her life. She loves trains and is very excited about that specific aspect. Her fave games are mainly isometric CRPGs, but she’s very nostalgic for all farming sims. | Animator, User Researcher, QA Tester |
+| Alex | Senior Computer Science major, math and philosophy minor. Some absolute banger games are Monster Hunter, The Souls franchises and many other RPGs. | Level Designer, Publicist, QA Tester |
+| Christian <img src="/assets/images/christian_project.jpg" width="200" height="200"> | Senior Computer Science major, with minors in Math and Philosophy.  He loves Rocket League and the Dark Souls series, but does not limit himself by a genre of video game. | QA Tester, (and whatever else he wants) | 
 
 ## Game Description 
-working on it
+working on it, starting here:
+
+What was supposed to be an easy escape becomes a wild ride, as your escape on the passenger train, Twm Siôn Cati, gains a following. Try to escape to the locomotive with your loot--the Queen of England’s crown--to the locomotive to ensure your escape. In this exciting platformer you will run and shoot to progress through the train using 3 distinct weapons.
 
 ## Advertisement
 also working on it

@@ -1,3 +1,40 @@
+## Introduction To Game
+
+Your heist on the queens crown was a success!  Now however, you need to get off the train with the crown and your life!  Dash through all the train cars to safety and the ultimate victory!
+
+## Team Bios
+
+- Hannah is a junior Computer Science and Mathematics double major.  Her favorite games are Eternal Sonata and the classics like Mario and Pokemon.
+Roles: Developer, Producer
+- Elise is a senior computer science and art history double major; she aims to, yet again, combine these two aspects of her life. She loves trains and is very excited about that specific aspect. Her fave games are mainly isometric CRPGs, but she’s very nostalgic for all farming sims.
+Roles: (Main) Animator, User Researcher, QA Tester 
+- Alex is a senior Computer Science major, math and philosophy minor. Some absolute banger games are Monster Hunter, The Souls franchises and many other RPGs. 
+Roles: Level Designer, Publicist, QA tester  
+- Christian is a senior Computer Science major, with minors in Math and Philosophy.  He loves Rocket League and the Dark Souls series, but does not limit himself by a genre of video game.  
+Roles: QA Tester, (and whatever else he wants)
+
+## Game Description 
+working on it
+
+## Advertisement
+also working on it
+
+## Key Features
+All of the things you can look forward to in our super cool game!
+- side scroller with platformer aspects
+- small enemy battles/fights
+- different weapon options
+- gravity
+- health systems
+-
+maybe add more... still working on it
+
+## Background
+gonna work on it eventually
+
+## Concept Art
+in progress
+
 ## Welcome to GitHub Pages
 
 You can use the [editor on GitHub](https://github.com/hggorel/Off-The-Rails/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.

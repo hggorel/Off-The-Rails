@@ -6,12 +6,18 @@ Your heist on the queens crown was a success!  Now however, you need to get off 
 
 - Hannah is a junior Computer Science and Mathematics double major.  Her favorite games are Eternal Sonata and the classics like Mario and Pokemon.
 Roles: Developer, Producer
+<img src="/assets/images/hannah_project.png" width="150" height="200">
+
 - Elise is a senior computer science and art history double major; she aims to, yet again, combine these two aspects of her life. She loves trains and is very excited about that specific aspect. Her fave games are mainly isometric CRPGs, but she’s very nostalgic for all farming sims.
 Roles: (Main) Animator, User Researcher, QA Tester 
+<img src="/assets/images/elise_project.jpg" width="150" height="200">
+
 - Alex is a senior Computer Science major, math and philosophy minor. Some absolute banger games are Monster Hunter, The Souls franchises and many other RPGs. 
 Roles: Level Designer, Publicist, QA tester  
+
 - Christian is a senior Computer Science major, with minors in Math and Philosophy.  He loves Rocket League and the Dark Souls series, but does not limit himself by a genre of video game.  
 Roles: QA Tester, (and whatever else he wants)
+<img src="/assets/images/christian_project.jpg" width="150" height="200">
 
 ## Game Description 
 working on it

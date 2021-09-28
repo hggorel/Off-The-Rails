@@ -34,6 +34,9 @@ gonna work on it eventually
 
 ## Concept Art
 in progress
+Main Character (Playable) :
+
+<img src="/assets/images/concept_art.png" width="350" height="275">
 
 ## Welcome to GitHub Pages
 

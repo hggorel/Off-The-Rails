@@ -12,9 +12,8 @@ Your heist for the queens crown was a success!  But you're not done yet, you nee
 | Christian <img src="/assets/images/christian_project.jpg" width="200" height="200"> | Senior Computer Science major, with minors in Math and Philosophy.  He loves Rocket League and the Dark Souls series, but does not limit himself by a genre of video game. | QA Tester, (and whatever else he wants) | 
 
 ## Game Description 
-working on it, starting here:
 
-What was supposed to be an easy escape becomes a wild ride, as your escape on the passenger train, Twm Siôn Cati, gains a following. Try to escape to the locomotive with your loot--the Queen of England’s crown--to the locomotive to ensure your escape. In this exciting platformer you will run and shoot to progress through the train using 3 distinct weapons.
+What was supposed to be an easy escape becomes a wild ride, as your escape on the passenger train, Twm Siôn Cati, gains a following. Try to escape with your loot--the Queen of England’s crown-- all the way up to the locomotive to ensure your escape. In this exciting platformer you will run and shoot to progress through the train using 3 distinct weapons.  Each train car you enter holds unique challenges and enemies that must be defeated in order to pass through, but careful you need to move fast in order to stay ahead of the queen's guards pursuing you! Solve puzzles, shoot enemies, fight off the guards, and escape to the locomotive, or else you'll be thrown in the Tower! 
 
 ## Advertisement
 also working on it

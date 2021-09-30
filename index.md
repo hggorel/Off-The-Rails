@@ -21,15 +21,14 @@ also working on it
 ## Key Features
 All of the things you can look forward to in our super cool game!
 - side scroller with platformer aspects
-- small enemy battles/fights
-- different weapon options
 - gravity
+- brief enemy battles
+- small puzzles
+- different weapon options
 - health systems
--
-maybe add more... still working on it
 
 ## Background
-gonna work on it eventually
+Set in early 1900s England, our heroine struggles through her life along with the rest of the low-middle class families in England.  Living in basic poverty while the high class and royals thrive without a care in the world, refusing to give up even scraps of their excessive wealth for the good of others.  (Insert main character's name here) has had enough and decides to push back against their exuberant neglect.  She embarks on a dangerous journey to steal the Queen of England's crown, both a symbolic strike against the crown and all it stands for and a Robin Hood-esque move of stealing from the rich to give to the poor.  The crown has millions of pounds worth of jewels embedded in it, enough to save (main character's name)'s village and many more from starvation.
 
 ## Concept Art
 in progress

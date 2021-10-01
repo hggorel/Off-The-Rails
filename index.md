@@ -8,7 +8,7 @@ Your heist for the queens crown was a success!  But you're not done yet, you nee
 |----|---|---|
 |Hannah <img src="/assets/images/hannah_project.png" width="175" height="225"> | Junior Computer Science and Mathematics double major.  Her favorite games are Eternal Sonata and the classics like Mario and Pokemon | Developer, Producer|
 | Elise <img src="/assets/images/elise_project.jpg" width="175" height="225"> | Senior computer science and art history double major; she aims to, yet again, combine these two aspects of her life. She loves trains and is very excited about that specific aspect. Her fave games are mainly isometric CRPGs, but she’s very nostalgic for all farming sims. | Animator, User Researcher, QA Tester |
-| Alex | Senior Computer Science major, math and philosophy minor. Some absolute banger games are Monster Hunter, The Souls franchises and many other RPGs. | Level Designer, Publicist, QA Tester |
+| Alex <img src="/assets/images/alex_vertical_project.png" width="200" height="250"> | Senior Computer Science major, math and philosophy minor. Some absolute banger games are Monster Hunter, The Souls franchises and many other RPGs. | Level Designer, Publicist, QA Tester |
 | Christian <img src="/assets/images/christian_project.jpg" width="200" height="200"> | Senior Computer Science major, with minors in Math and Philosophy.  He loves Rocket League and the Dark Souls series, but does not limit himself by a genre of video game. | QA Tester, (and whatever else he wants) | 
 
 ## Game Description 

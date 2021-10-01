@@ -6,9 +6,9 @@ Your heist for the queens crown was a success!  But you're not done yet, you nee
 
 | Name | Bio | Roles |
 |----|---|---|
-|Hannah <img src="https://hggorel.github.io/Off-The-Rails/assets/images/hannah_project.png" width="225" height="250"> | Junior Computer Science and Mathematics double major.  Her favorite games are Eternal Sonata and the classics like Mario and Pokemon | Developer, Producer|
+|Hannah <img src="https://hggorel.github.io/Off-The-Rails/assets/images/hannah_project.png" width="225" height="275"> | Junior Computer Science and Mathematics double major.  Her favorite games are Eternal Sonata and the classics like Mario and Pokemon | Developer, Producer|
 | Elise <img src="https://hggorel.github.io/Off-The-Rails/assets/images/elise_project.jpg" width="225" height="250"> | Senior computer science and art history double major; she aims to, yet again, combine these two aspects of her life. She loves trains and is very excited about that specific aspect. Her fave games are mainly isometric CRPGs, but she’s very nostalgic for all farming sims. | Animator, User Researcher, QA Tester |
-| Alex <img src="https://hggorel.github.io/Off-The-Rails/assets/images/alex_vertical_project.png" width="225" height="250"> | Senior Computer Science major, math and philosophy minor. Some absolute banger games are Monster Hunter, The Souls franchises and many other RPGs. | Level Designer, Publicist, QA Tester |
+| Alex <img src="https://hggorel.github.io/Off-The-Rails/assets/images/alex_vertical_project.png" width="225" height="275"> | Senior Computer Science major, math and philosophy minor. Some absolute banger games are Monster Hunter, The Souls franchises and many other RPGs. | Level Designer, Publicist, QA Tester |
 | Christian <img src="https://hggorel.github.io/Off-The-Rails/assets/images/christian_project.jpg" width="225" height="225"> | Senior Computer Science major, with minors in Math and Philosophy.  He loves Rocket League and the Dark Souls series, but does not limit himself by a genre of video game. | QA Tester, Game Designer, Dev/Programmer | 
 
 ## Game Description 
@@ -38,9 +38,9 @@ Mable Brown(Playable) :
 
 <img src="https://hggorel.github.io/Off-The-Rails/assets/images/concept_art.png" width="350" height="275">
 
-| Queens Guard | Not James Bond | Military | 
-| --- | --- | --- |
-| <img src="https://hggorel.github.io/Off-The-Rails/assets/images/queensguard_sprite.png" width="225" height="225"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/notjamesbond_sprite.png" width="225" height="225"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/military_sprite.png" width="225" height="225"> |
+| Queens Guard | Not James Bond | Military | Herlock Sholmes | Green Lad |
+| --- | --- | --- | --- | --- |
+| <img src="https://hggorel.github.io/Off-The-Rails/assets/images/queensguard_sprite.png" width="175" height="175"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/notjamesbond_sprite.png" width="175" height="175"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/military_sprite.png" width="175" height="175"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/herlocksholmes_sprite.png" width="175" height="175"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/greenlad_sprite.png" width="175" height="175"> |
 
 ## Welcome to GitHub Pages
 

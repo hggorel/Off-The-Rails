@@ -9,11 +9,11 @@ Your heist for the queens crown was a success!  But you're not done yet, you nee
 |Hannah <img src="/assets/images/hannah_project.png" width="175" height="225"> | Junior Computer Science and Mathematics double major.  Her favorite games are Eternal Sonata and the classics like Mario and Pokemon | Developer, Producer|
 | Elise <img src="/assets/images/elise_project.jpg" width="175" height="225"> | Senior computer science and art history double major; she aims to, yet again, combine these two aspects of her life. She loves trains and is very excited about that specific aspect. Her fave games are mainly isometric CRPGs, but she’s very nostalgic for all farming sims. | Animator, User Researcher, QA Tester |
 | Alex <img src="/assets/images/alex_vertical_project.png" width="200" height="250"> | Senior Computer Science major, math and philosophy minor. Some absolute banger games are Monster Hunter, The Souls franchises and many other RPGs. | Level Designer, Publicist, QA Tester |
-| Christian <img src="/assets/images/christian_project.jpg" width="200" height="200"> | Senior Computer Science major, with minors in Math and Philosophy.  He loves Rocket League and the Dark Souls series, but does not limit himself by a genre of video game. | QA Tester, (and whatever else he wants) | 
+| Christian <img src="/assets/images/christian_project.jpg" width="200" height="200"> | Senior Computer Science major, with minors in Math and Philosophy.  He loves Rocket League and the Dark Souls series, but does not limit himself by a genre of video game. | QA Tester, Game Designer, Dev/Programmer | 
 
 ## Game Description 
 
-What was supposed to be an easy escape becomes a wild ride, as your escape on the passenger train, Twm Siôn Cati, gains a following. Try to escape with your loot--the Queen of England’s crown-- all the way up to the locomotive to ensure your escape. In this exciting platformer you will run and shoot to progress through the train using 3 distinct weapons.  Each train car you enter holds unique challenges and enemies that must be defeated in order to pass through, but careful you need to move fast in order to stay ahead of the queen's guards pursuing you! Solve puzzles, shoot enemies, fight off the guards, and escape to the locomotive, or else you'll be thrown in the Tower! 
+What was supposed to be an easy escape becomes a wild ride, as your escape on the passenger train, Twm Siôn Cati, gains a following. Try to escape with your loot--the Queen of England’s crown-- all the way up to the locomotive to ensure your escape. In this exciting platformer, possibly reminiscent of Mario and Indiana Jones, you will run and shoot to progress through the train using 3 distinct weapons.  Each train car you enter holds unique challenges and enemies that must be defeated in order to pass through, but careful you need to move fast in order to stay ahead of the queen's guards pursuing you! Solve puzzles, shoot enemies, fight off the guards, and escape to the locomotive, or else you'll be thrown in the Tower! 
 
 ## Advertisement
 also working on it
@@ -24,11 +24,13 @@ All of the things you can look forward to in our super cool game!
 - gravity
 - brief enemy battles
 - small puzzles
-- different weapon options
 - health systems
+- basic enemy AI
+- different shot patterns for different enemies
+- 3 different weapons unlocked over different levels
 
 ## Background
-Set in early 1960s England, our heroine struggles through her life along with the rest of the low-middle class families in north England.  Living in basic poverty while the high class and royals thrive without a care in the world, refusing to give up even scraps of their excessive wealth for the good of others. Mabel Brown has had enough and decides to push back against their exuberant neglect.  She embarks on a dangerous journey to steal the Queen of England's crown, both a symbolic strike against the crown and all it stands for and a Robin Hood-esque move of stealing from the rich to give to the poor.  The crown has millions of pounds worth of jewels embedded in it, enough to save Mabel's hamlet and many more from starvation.
+Set in early 1960s England, our heroine struggles through her life along with the rest of the low-middle class families in North England. Living in basic poverty while the high class and royals thrive without a care in the world, refusing to give up even scraps of their excessive wealth for the good of others. Mabel Brown has had enough and decides to push back against their exuberant neglect. She embarks on a dangerous journey to steal the Queen of England’s crown, both a symbolic strike against the crown and all it stands for and a Robin Hood-esque move of stealing from the rich to give to the poor. The crown has millions of pounds worth of jewels embedded in it, enough to save Mabel’s hamlet and many more from starvation.  
 
 ## Concept Art
 in progress

@@ -32,6 +32,8 @@ All of the things you can look forward to in our super cool game!
 ## Background
 Set in early 1960s England, our heroine struggles through her life along with the rest of the low-middle class families in North England. Living in basic poverty while the high class and royals thrive without a care in the world, refusing to give up even scraps of their excessive wealth for the good of others. Mabel Brown has had enough and decides to push back against their exuberant neglect. She embarks on a dangerous journey to steal the Queen of England’s crown, both a symbolic strike against the crown and all it stands for and a Robin Hood-esque move of stealing from the rich to give to the poor. The crown has millions of pounds worth of jewels embedded in it, enough to save Mabel’s hamlet and many more from starvation.  
 
+As Mabel makes her great escape to the passenger train Twm Siôn Cati, several enemies will pursue Mabel. The Queensguard will first pursue Mabel from the outset, being her most distinctive enemy. But as she succeeds, more difficult and quirky enemies will begin to pursue her, including military men, Herlock Sholmes, and Bames Jond. If she can just make it past these foes, she can complete her final great heist: stealing the locomotive to get right out of England--and poverty!
+
 ## Concept Art
 in progress
 Mable Brown(Playable) :

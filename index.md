@@ -16,7 +16,7 @@ Your heist for the queens crown was a success!  But you're not done yet, you nee
 What was supposed to be an easy escape becomes a wild ride, as your escape on the passenger train, Twm Siôn Cati, gains a following. Try to escape with your loot--the Queen of England’s crown-- all the way up to the locomotive to ensure your escape. In this exciting platformer, possibly reminiscent of Mario and Indiana Jones, you will run and shoot to progress through the train using 3 distinct weapons.  Each train car you enter holds unique challenges and enemies that must be defeated in order to pass through, but careful you need to move fast in order to stay ahead of the queen's guards pursuing you! Solve puzzles, shoot enemies, fight off the guards, and escape to the locomotive, or else you'll be thrown in the Tower! 
 
 ## Advertisement
-also working on it
+Off the Rails is a nostalgic return to platformers and playing games on Newgrounds with your friends--without having too much nostalgia for all the problems that existed in 1960’s Britain. Let’s be honest, though: who hasn’t wanted to steal the Queen’s crown? In classic Arsene Lupin style, this game is a bit of an extension of that fantasy with hijinks, fast action, and train excitement (for the untapped market of the train fan).
 
 ## Key Features
 All of the things you can look forward to in our super cool game!
@@ -36,16 +36,16 @@ As Mabel makes her great escape to the passenger train Twm Siôn Cati, several e
 
 
 ## Concept Art
-in progress
 Mable Brown(Playable) :
 
 <img src="https://hggorel.github.io/Off-The-Rails/assets/images/concept_art.png" width="350" height="275">
 
+Side Characters (Not Playable):
 | Queens Guard | Not James Bond | Military | Herlock Sholmes | Green Lad |
 | --- | --- | --- | --- | --- |
 | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/queensguard_sprite.png" width="175" height="175"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/notjamesbond_sprite.png" width="175" height="175"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/military_sprite.png" width="175" height="175"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/herlocksholmes_sprite.png" width="175" height="175"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/greenlad_sprite.png" width="175" height="175"> |
 
-## Welcome to GitHub Pages
+<!---  Welcome to GitHub Pages -->
 
 You can use the [editor on GitHub](https://github.com/hggorel/Off-The-Rails/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 

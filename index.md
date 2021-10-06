@@ -36,13 +36,12 @@ As Mabel makes her great escape to the passenger train Twm Siôn Cati, several e
 
 
 ## Concept Art
-Mable Brown(Playable) :
 
-<img src="https://hggorel.github.io/Off-The-Rails/assets/images/concept_art.png" width="350" height="275">
-
-Train:
-
-<img src="https://hggorel.github.io/Off-The-Rails/assets/images/train_concept.png" width="350" height="275">
+Mable Brown(Playable) and Train Concept
+<p float="left">
+  <img src="https://hggorel.github.io/Off-The-Rails/assets/images/concept_art.png" width="350" height="275">
+  <img src="https://hggorel.github.io/Off-The-Rails/assets/images/train_concept.png" width="350" height="275">
+</p>
 
 Side Characters (Not Playable):
 

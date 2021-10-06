@@ -13,7 +13,7 @@ Your heist for the Queen's crown was a success!  But you're not done yet, you ne
 
 ## Game Description 
 
-What was supposed to be an easy escape becomes a wild ride, as your escape on the passenger train, Twm Siôn Cati, gains a following. Try to escape with your loot--the Queen of England’s crown-- all the way up to the locomotive to ensure your escape. In this exciting platformer, possibly reminiscent of Mario and Indiana Jones, you will run and shoot to progress through the train using 3 distinct weapons.  Each train car you enter holds unique challenges and enemies that must be defeated in order to pass through, but careful you need to move fast in order to stay ahead of the queen's guards pursuing you! Solve puzzles, shoot enemies, fight off the guards, and escape to the locomotive, or else you'll be thrown in the Tower! 
+What was supposed to be an easy escape becomes a wild ride. Your escape on the passenger train, Twm Siôn Cati, gains a following. Try to escape with your loot--the Queen of England’s crown-- all the way up to the locomotive to ensure your escape. In this exciting platformer, possibly reminiscent of Mario and Indiana Jones, you will run and shoot to progress through the train using 3 distinct weapons.  Each train car you enter holds unique challenges and enemies that must be defeated in order to pass through, but be careful, you need to act fast in order to stay ahead of the Queen's guards pursuing you! Solve puzzles, shoot enemies, fight off the guards, and escape to the locomotive, or else you'll be thrown in the Tower! 
 
 ## Advertisement
 Off the Rails is a nostalgic return to platformers and playing games on Newgrounds with your friends--without having too much nostalgia for all the problems that existed in 1960’s Britain. Let’s be honest, though: who hasn’t wanted to steal the Queen’s crown? In classic Arsene Lupin style, this game is a bit of an extension of that fantasy with hijinks, fast action, and train excitement (for the untapped market of the train fan).
@@ -21,7 +21,7 @@ Off the Rails is a nostalgic return to platformers and playing games on Newgroun
 ## Key Features
 All of the things you can look forward to in our super cool game!
 - side scroller with platformer aspects
-- gravity
+- action movie style gravity
 - brief enemy battles
 - small puzzles
 - health systems

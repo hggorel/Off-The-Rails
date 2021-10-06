@@ -40,6 +40,10 @@ Mable Brown(Playable) :
 
 <img src="https://hggorel.github.io/Off-The-Rails/assets/images/concept_art.png" width="350" height="275">
 
+Train:
+
+<img src="https://hggorel.github.io/Off-The-Rails/assets/images/train_concept.png" width="350" height="275">
+
 Side Characters (Not Playable):
 
 | Queens Guard | Not James Bond | Military | Herlock Sholmes | Green Lad |

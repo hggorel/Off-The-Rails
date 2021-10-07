@@ -49,3 +49,10 @@ Side Characters (Not Playable):
 | --- | --- | --- | --- | --- |
 | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/queensguard_sprite.png" width="175" height="175"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/notjamesbond_sprite.png" width="175" height="175"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/military_sprite.png" width="175" height="175"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/herlocksholmes_sprite.png" width="175" height="175"> | <img src="https://hggorel.github.io/Off-The-Rails/assets/images/greenlad_sprite.png" width="175" height="175"> |
 
+## Poll: what is most important to YOU in a game?
+
+<p><a href="https://api.gh-polls.com/poll/01FHE444TZWQH3SYXSWKKP6CY4/Controls/vote"><img src="https://api.gh-polls.com/poll/01FHE444TZWQH3SYXSWKKP6CY4/Controls" alt=""></a>
+<a href="https://api.gh-polls.com/poll/01FHE444TZWQH3SYXSWKKP6CY4/Story/vote"><img src="https://api.gh-polls.com/poll/01FHE444TZWQH3SYXSWKKP6CY4/Story" alt=""></a>
+<a href="https://api.gh-polls.com/poll/01FHE444TZWQH3SYXSWKKP6CY4/Aesthetics/vote"><img src="https://api.gh-polls.com/poll/01FHE444TZWQH3SYXSWKKP6CY4/Aesthetics" alt=""></a>
+<a href="https://api.gh-polls.com/poll/01FHE444TZWQH3SYXSWKKP6CY4/Replayability/vote"><img src="https://api.gh-polls.com/poll/01FHE444TZWQH3SYXSWKKP6CY4/Replayability" alt=""></a></p>
+

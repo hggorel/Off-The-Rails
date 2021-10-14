@@ -37,20 +37,22 @@ herlock sholmes is 26-30
 27-29 is running
 30 is jumping
 --]]
-actor ={
-	movecount=0,
-	sprite = 16,
-	x = 32,
-	y = 64
-}
+
+enemies = {}
 
 bullets = {}
+
+function _init()
+	create_soldier()
+end
 
 
 function _draw()
 	cls()
 	spr(player.sprite, player.x, player.y)
-	spr(actor.sprite, actor.x, actor.y)
+	for e in all(enemies) do
+		spr(e.sprite, e.x, e.y)
+	end
 	for b in all(bullets) do
 		spr(b.sprite, b.x, b.y)
 	end
@@ -72,17 +74,31 @@ function fire()
 	add(bullets, bullet)
 end
 
+function create_soldier()
+	local actor ={
+		movecount=0,
+		sprite = 16,
+		x = 32,
+		y = 64
+	}
+	
+	add(enemies, actor)
+	
+end
+
 function moving_soldier()
-	if actor.movecount<5 then
-		actor.x+=1
-	end
-	if actor.movecount>5 then
-		actor.x-=1
-	end
-	if actor.movecount<10 then
-		actor.movecount+=1
-	else
-		actor.movecount=0
+	for actor in all(enemies) do
+		if actor.movecount<5 then
+			actor.x+=1
+		end
+		if actor.movecount>5 then
+			actor.x-=1
+		end
+		if actor.movecount<10 then
+			actor.movecount+=1
+		else
+			actor.movecount=0
+		end
 	end
 end
 
@@ -115,6 +131,15 @@ function _update()
 	end
 	
 	moving_soldier()
+	
+	for e in all(enemies) do
+		for b in all(bullets) do
+			if (b.x - e.x)<=3 then
+				del(enemies, e)
+				del(bullets, b)
+			end
+		end
+	end
 
 end
 

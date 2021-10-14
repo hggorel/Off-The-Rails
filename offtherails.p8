@@ -1,10 +1,8 @@
 pico-8 cartridge // http://www.pico-8.com
-version 32
+version 33
 __lua__
 --basic set up sections
 --in the game
-
-function _init
 
 --tables of characters
 
@@ -18,8 +16,10 @@ function _init
 10 is crouch w gun (if needed ever)
 --]]
 player ={
-x = 1,
-y = 1
+	movecount=1,
+	sprite = 1,
+	x = 32,
+	y = 64
 }
 
 --actors (enemies) table
@@ -38,9 +38,87 @@ herlock sholmes is 26-30
 30 is jumping
 --]]
 actor ={
-x = 1,
-y = 1
+	movecount=0,
+	sprite = 16,
+	x = 32,
+	y = 64
 }
+
+bullets = {}
+
+
+function _draw()
+	cls()
+	spr(player.sprite, player.x, player.y)
+	spr(actor.sprite, actor.x, actor.y)
+	for b in all(bullets) do
+		spr(b.sprite, b.x, b.y)
+	end
+end
+
+function fire()
+	local bullet = {
+		sprite=43,
+		x=player.x,
+		y=player.y,
+		dx=3, 
+		dy=0
+	}
+	
+	if player.sprite<=4 then
+		bullet.dx=-3
+	end
+	
+	add(bullets, bullet)
+end
+
+function moving_soldier()
+	if actor.movecount<5 then
+		actor.x+=1
+	end
+	if actor.movecount>5 then
+		actor.x-=1
+	end
+	if actor.movecount<10 then
+		actor.movecount+=1
+	else
+		actor.movecount=0
+	end
+end
+
+function _update()
+	for b in all(bullets) do
+		b.x+=b.dx
+		b.y+=b.dy
+		if b.x<0 or b.x > 128 or b.y < 0 or b.y>128 then
+			del(bullets, b)
+		end
+	end
+	
+	if btn(0) then 
+		player.x-=1
+		player.sprite=1+player.movecount
+	end
+	if btn(1) then
+		player.x+=1
+		player.sprite =7+player.movecount
+	end
+	if btnp(4) then
+		fire()
+	end
+	
+	if player.movecount==3 then
+		player.movecount=1
+	end
+	if player.movecount<3 then
+		player.movecount+=1
+	end
+	
+	moving_soldier()
+
+end
+
+
 -->8
 --map section
 --[[
@@ -84,8 +162,8 @@ __gfx__
 aaaaaaaa3366666666666633008cddd6888118dcc6d88cdcccc8003ccc6633bdccdc300000000022000cc0000000000000000000000000000000000000000000
 a999999a360000000000006300cccdd6888008c6cddc86dcccc8003c6dccc33ccd66300000000022000cc0000000000000000000000000000000000000000000
 a9aaaa9a3600000000000063088cc6dc888008cdcdd88cd6ccc8003cddccc33cdd6c300000000022444444440000000000000000000000000000000000000000
-a9aaaa9a36000000000000638a8888888880082888882888882800333bb333b33333300002222222000440000000000000000000000000000000000000000000
-a999999a36000000000000632282882200811822888222888228003333333333bbb3300002222222000440000000000000000000000000000000000000000000
+a9aaaa9a36000000000000638a8888888880082888882888882800333bb333b33333300002222222000440000066600000000000000000000000000000000000
+a999999a36000000000000632282882200811822888222888228003333333333bbb3300002222222000440000066600000000000000000000000000000000000
 aaaaaaaa360000000000006388112288811008811888888118881133113333333113311005444445000440000000000000000000000000000000000000000000
 99999999336666666666663300110000011000011000000110000000110000000110000005500055005555000000000000000000000000000000000000000000
 0000000033333333333333330000000000000000cccccccc00000000000000000000000000000000000000000000000000000000000000000000000000000000

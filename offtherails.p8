@@ -19,7 +19,8 @@ player ={
 	movecount=1,
 	sprite = 1,
 	x = 32,
-	y = 64
+	y = 64,
+	ydiff=0
 }
 
 --actors (enemies) table
@@ -103,6 +104,7 @@ function moving_soldier()
 end
 
 function _update()
+	-- moving all of the bullets
 	for b in all(bullets) do
 		b.x+=b.dx
 		b.y+=b.dy
@@ -111,6 +113,7 @@ function _update()
 		end
 	end
 	
+	-- moving player based on input
 	if btn(0) then 
 		player.x-=1
 		player.sprite=1+player.movecount
@@ -119,10 +122,15 @@ function _update()
 		player.x+=1
 		player.sprite =7+player.movecount
 	end
+	if btnp(2) then
+		player.y-=5
+		player.ydiff+=5
+	end
 	if btnp(4) then
 		fire()
 	end
 	
+	-- switching to see animation
 	if player.movecount==3 then
 		player.movecount=1
 	end
@@ -132,6 +140,7 @@ function _update()
 	
 	moving_soldier()
 	
+	-- removing enemies that have been shot
 	for e in all(enemies) do
 		for b in all(bullets) do
 			if (b.x - e.x)<=3 then
@@ -140,7 +149,12 @@ function _update()
 			end
 		end
 	end
-
+	
+	--gravity
+	if player.ydiff > 0 then
+		player.y+=1
+		player.ydiff-=1
+	end
 end
 
 

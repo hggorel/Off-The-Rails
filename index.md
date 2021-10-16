@@ -21,13 +21,15 @@ Off the Rails is a nostalgic return to platformers and playing games on Newgroun
 ## Key Features
 All of the things you can look forward to in our super cool game!
 - side scroller with platformer aspects
+- keypad bound movement: up for jump, left and right to move, and space to shoot
 - action movie style gravity
 - brief enemy battles
 - small puzzles
 - health systems
 - basic enemy AI
 - different shot patterns for different enemies
-- 3 different weapons unlocked over different levels
+- 3 different weapons to unlock
+- And many unique train car levels
 
 ## Background
 Our story is set in early 1960s UK, without too much care for historical accuracy. Our heroine, Mabel Brown, is apart of the struggles of the daily life of those working class families in North England. She lives in a coal mining town, similar to many others in the North, and Mabel sees firsthand the horrors of working in the mineshafts. Young men never making it out of the tunnels, the terrifying collapses, and the black lung tearing was driving the hamlet closer to a revolt everyday. England's labor movements are just starting to rise up again, and Mabel is determined to play  her part. 

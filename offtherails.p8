@@ -5,65 +5,63 @@ __lua__
 --in the game
 
 function _init()
-	end
+	--flags (global)
+	--flag 0 = floor/coundary wall
+	--flag 1 = interactable/door?
 
---flags (global)
---flag 0 = floor/coundary wall
---flag 1 = interactable/door?
+	--tables of characters
 
---tables of characters
+	--player table
+		--[[sprites for mabel are as follows
+		1 is idle sprite
+		2-4 is running sprites
+		5-7 is running n gunning sprites
+		8 is jumping sprite
+		9 is jumping w gun sprite
+		10 is crouch w gun (if needed ever)
+		--]]
+	player ={
+		movecount=1,
+		sprite = 1,
+		health = 20,
+		x = 32,
+		y = 64,
+		ydiff=0
+	}	
 
---player table
---[[sprites for mabel are as follows
-1 is idle sprite
-2-4 is running sprites
-5-7 is running n gunning sprites
-8 is jumping sprite
-9 is jumping w gun sprite
-10 is crouch w gun (if needed ever)
---]]
-player ={
-	movecount=1,
-	sprite = 1,
-	x = 32,
-	y = 64,
-	ydiff=0
-}
+	--actors (enemies) table
+	--[[
+	queensguard is sprites 16-20
+	16 is the idle sprite
+	17-19 are moving sprites
+	20 is jumping sprite
+	21-25 is bames jond sprites
+	21 is idle
+	22-24 is running
+	25 is jumping
+	herlock sholmes is 26-30
+	26 is idle
+	27-29 is running
+	30 is jumping
+	--]]
 
---actors (enemies) table
---[[
-queensguard is sprites 16-20
-16 is the idle sprite
-17-19 are moving sprites
-20 is jumping sprite
-21-25 is bames jond sprites
-21 is idle
-22-24 is running
-25 is jumping
-herlock sholmes is 26-30
-26 is idle
-27-29 is running
-30 is jumping
---]]
+	enemies = {}
 
-enemies = {}
+	--extra people who aren't our
+	--friends but aren't our enemies
+	extra ={
+		x = 4*8,
+		y = 3*8,
+		dx = 2, --speed. not properly implemented yet
+		timing = .15,
+		sprite = 64,
+		flipx = false,
+		movecount = 0 --movecount format added to match hannah
+	}
 
---extra people who aren't our
---friends but aren't our enemies
-extra ={
-	x = 4*8,
-	y = 3*8,
-	dx = 2, --speed. not properly implemented yet
-	timing = .15,
-	sprite = 64,
-	flipx = false,
-	movecount = 0 --movecount format added to match hannah
-}
-
-bullets = {}
-
-function _init()
-	create_soldier()
+	danger = {}
+	bullets = {}
+	create_soldier(32, 64)
 end
 
 function fire()
@@ -76,18 +74,31 @@ function fire()
 	}
 
 	if player.sprite<=4 then
-		bullet.dx=-3
+		bullet.dx=-2
 	end
 
 	add(bullets, bullet)
 end
 
-function create_soldier()
+function shoot(startx, starty)
+	local bullet= {
+		sprite=56,
+		x=startx,
+		y=starty,
+		dx=1,
+		dy=0
+	}
+	
+	add(danger, bullet)
+end
+
+function create_soldier(newx, newy)
 	local actor ={
 		movecount=0,
+		shootcount=0,
 		sprite = 16,
-		x = 32,
-		y = 64
+		x = newx,
+		y = newy
 	}
 
 	add(enemies, actor)
@@ -102,11 +113,17 @@ function moving_soldier()
 		if actor.movecount>5 then
 			actor.x-=1
 		end
+		
 		if actor.movecount<10 then
 			actor.movecount+=1
 		else
 			actor.movecount=0
 		end
+		
+		if actor.shootcount%20==0 then
+			shoot(actor.x, actor.y)
+		end
+		actor.shootcount+=1
 	end
 end
 
@@ -117,6 +134,14 @@ function _update()
 		b.y+=b.dy
 		if b.x<0 or b.x > 128 or b.y < 0 or b.y>128 then
 			del(bullets, b)
+		end
+	end
+	
+	for b in all(danger) do
+		b.x+=b.dx
+		b.y+=b.dy
+		if b.x<0 or b.x>128 or b.y<0 or b.y>128 then
+			del(danger, b)
 		end
 	end
 
@@ -150,11 +175,24 @@ function _update()
 	-- removing enemies that have been shot
 	for e in all(enemies) do
 		for b in all(bullets) do
-			if (b.x - e.x)<=3 then
+			if abs(b.x - e.x)<=1 then
 				del(enemies, e)
 				del(bullets, b)
 			end
 		end
+	end
+	
+	for b in all(danger) do
+		if abs(b.x - player.x)<=1 then
+			player.x-=1
+			player.health-=5
+			del(danger, b)
+		end
+	end
+	
+	if player.health<=0 then
+		player.sprite=0
+		--ask elise to make a sprite to show defeat??
 	end
 
 	--gravity
@@ -197,6 +235,9 @@ function _draw()
 		spr(e.sprite, e.x, e.y)
 	end
 	for b in all(bullets) do
+		spr(b.sprite, b.x, b.y)
+	end
+	for b in all(danger) do
 		spr(b.sprite, b.x, b.y)
 	end
 end

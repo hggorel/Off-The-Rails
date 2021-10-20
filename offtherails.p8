@@ -1,69 +1,90 @@
 pico-8 cartridge // http://www.pico-8.com
-version 33
+version 32
 __lua__
 --basic set up sections
 --in the game
 
 function _init()
-	end
+	--flags (global)
+	--flag 0 = floor/coundary wall
+	--flag 1 = interactable/door?
 
---flags (global)
---flag 0 = floor/coundary wall
---flag 1 = interactable/door?
+	--tables of characters
 
---tables of characters
+	--player table
+		--[[sprites for mabel are as follows
+		1 is idle sprite
+		2-4 is running sprites
+		5-7 is running n gunning sprites
+		8 is jumping sprite
+		9 is jumping w gun sprite
+		10 is crouch w gun (if needed ever)
+		--]]
+	player ={
+		movecount=1,
+		sprite = 1,
+		health = 50,
+		lives=3,
+		x = 32,
+		y = 64,
+		flipx=false,
+		gun=false, --for whichever player sprite
+		ydiff=0
+	}	
 
---player table
---[[sprites for mabel are as follows
-1 is idle sprite
-2-4 is running sprites
-5-7 is running n gunning sprites
-8 is jumping sprite
-9 is jumping w gun sprite
-10 is crouch w gun (if needed ever)
---]]
-player ={
-	movecount=1,
-	sprite = 1,
-	x = 32,
-	y = 64,
-	ydiff=0
-}
+	--actors (enemies) table
+	--[[
+	queensguard is sprites 16-20
+	16 is the idle sprite
+	17-19 are moving sprites
+	20 is jumping sprite
+	21-25 is bames jond sprites
+	21 is idle
+	22-24 is running
+	25 is jumping
+	herlock sholmes is 26-30
+	26 is idle
+	27-29 is running
+	30 is jumping
+	--]]
 
---actors (enemies) table
---[[
-queensguard is sprites 16-20
-16 is the idle sprite
-17-19 are moving sprites
-20 is jumping sprite
-21-25 is bames jond sprites
-21 is idle
-22-24 is running
-25 is jumping
-herlock sholmes is 26-30
-26 is idle
-27-29 is running
-30 is jumping
---]]
+	enemies = {}
 
-enemies = {}
+	--extra people who aren't our
+	--friends but aren't our enemies
+	extra ={
+		x = 4*8,
+		y = 3*8,
+		dx = 2, --speed. not properly implemented yet
+		timing = .15,
+		sprite = 64,
+		flipx = false,
+		movecount = 0 --movecount format added to match hannah
+	}
 
---extra people who aren't our
---friends but aren't our enemies
-extra ={
-	x = 4*8,
-	y = 3*8,
-	dx = 2, --speed. not properly implemented yet
-	timing = .15,
-	sprite = 64,
-	flipx = false,
-	movecount = 0 --movecount format added to match hannah
-}
-
-bullets = {}
-
-function _init()
-	create_soldier()
+	danger = {}
+	bullets = {}
+	create_soldier(32, 64)
+	
+	lives={}
+	heart1 = {
+		x=1,
+		y=20,
+		sprite=68
+	}
+	heart2={
+		x=9,
+		y=20,
+		sprite=68
+	}
+	heart3={
+		x=17,
+		y=20,
+		sprite=68
+	}
+	add(lives, heart1)
+	add(lives, heart2)
+	add(lives, heart3)
 end
 
 function fire()
@@ -75,19 +96,31 @@ function fire()
 		dy=0
 	}
 
-	if player.sprite<=4 then
-		bullet.dx=-3
+	if player.flipx==false then
+		bullet.dx=-2
 	end
 
 	add(bullets, bullet)
 end
 
-function create_soldier()
+function shoot(startx, starty)
+	local bullet= {
+		sprite=56,
+		x=startx,
+		y=starty,
+		dx=1,
+		dy=0
+	}
+	add(danger, bullet)
+end
+
+function create_soldier(newx, newy)
 	local actor ={
 		movecount=0,
+		shootcount=0,
 		sprite = 16,
-		x = 32,
-		y = 64
+		x = newx,
+		y = newy
 	}
 
 	add(enemies, actor)
@@ -102,11 +135,17 @@ function moving_soldier()
 		if actor.movecount>5 then
 			actor.x-=1
 		end
+		
 		if actor.movecount<10 then
 			actor.movecount+=1
 		else
 			actor.movecount=0
 		end
+		
+		if actor.shootcount%20==0 then
+			shoot(actor.x, actor.y)
+		end
+		actor.shootcount+=1
 	end
 end
 
@@ -119,21 +158,50 @@ function _update()
 			del(bullets, b)
 		end
 	end
+	
+	for b in all(danger) do
+		b.x+=b.dx
+		b.y+=b.dy
+		if b.x<0 or b.x>128 or b.y<0 or b.y>128 then
+			del(danger, b)
+		end
+	end
 
+	--start of working on player gun animation
+	if player.gun then
+		player.sprite = 4+player.movecount --i don't remember the sprite number
+	end
+	
+	--gun based animation changes work but not correctly
 	-- moving player based on input
 	if btn(0) then
+		player.flipx=false
 		player.x-=1
-		player.sprite=1+player.movecount
+		if btnp(4) then
+		player.gun = true
+		player.sprite=5+player.movecount
+		else 
+			player.sprite = 1+player.movecount
+		 player.gun = false end --reset to normal sprite
 	end
 	if btn(1) then
+		player.flipx=true
 		player.x+=1
-		player.sprite =7+player.movecount
+		if btnp(4) then
+			player.gun = true
+			player.sprite = 5+player.movecount
+		else
+			player.sprite =1+player.movecount
+		 player.gun = false end
+		 --reset to normal sprite
 	end
 	if btnp(2) then
 		player.y-=5
 		player.ydiff+=5
+		if not btnp(4) then player.gun = false end --reset to normal sprite
 	end
 	if btnp(4) then
+		player.gun = true;
 		fire()
 	end
 
@@ -150,11 +218,34 @@ function _update()
 	-- removing enemies that have been shot
 	for e in all(enemies) do
 		for b in all(bullets) do
-			if (b.x - e.x)<=3 then
+			if abs(b.x - e.x)<=1 then
 				del(enemies, e)
 				del(bullets, b)
 			end
 		end
+	end
+	
+	for b in all(danger) do
+		if abs(b.x - player.x)<=1 then
+			player.x-=1
+			player.health-=5
+			del(danger, b)
+		end
+	end
+	
+	if player.health<=0 then
+		player.health=50
+		player.lives-=1
+		if player.lives==2 then
+			del(lives, heart3)
+		end
+		if player.lives==1 then
+			del(lives, heart2)
+		end
+		if player.lives==0 then
+			del(lives, heart1)
+		end
+		--ask elise to make a sprite to show defeat??
 	end
 
 	--gravity
@@ -192,13 +283,27 @@ function _draw()
  _drawmapsprites()
  _moveextra()
  spr(extra.sprite,extra.x,extra.y,1,1,extra.flipx,false)
-	spr(player.sprite, player.x, player.y)
+	
+	if player.lives>0 then
+		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
+	end
+	
 	for e in all(enemies) do
 		spr(e.sprite, e.x, e.y)
 	end
 	for b in all(bullets) do
 		spr(b.sprite, b.x, b.y)
 	end
+	for b in all(danger) do
+		spr(b.sprite, b.x, b.y)
+	end
+	for h in all(lives) do
+		spr(h.sprite, h.x, h.y)
+	end
+	
+	print('health', 1, 1, 6)
+	rectfill(1,8, player.health,9,8)
+	print('lives', 1, 13, 6)
 end
 
 function _drawmapsprites()
@@ -214,8 +319,6 @@ function _drawmapsprites()
 		spr(42,09*8,08*8) --table 1
 		spr(42,16*8,08*8) --table 2
 		spr(42,20*8,08*8) --table 3
-
-
 
 	end
 -->8
@@ -284,11 +387,11 @@ aaaaaaaa360000000000006388112288811008811888888118881133113333333113311005444445
 45444454bbbbbbbb333333337777777700077770ccccccccdddddddddddddddd0000000000000000000000000000000049999994400009943600006300000000
 4544445433333333333333330000000000000000ccccccccdddddddddddddddd0000000000000000000000000000000049999994400000943666666300000000
 000ccc00000000000011111000011110000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-00c66f0000cccc000144411000111110000000000000000000000000000000000000000000000000000000000000000000000000000088888000000000000000
-00c6fff000c6fff001343111000c4cd0000000000000000000000000000000000000000000000000000000000000000000000000000088fff800000000000000
-0cccff000cc6ff001144411100d444d00000000000000000000000000000000000000000000000000000000000000000000000000000883f3800000000000000
-0ddddd000dddddf01555551000111110000000000000000000000000000000000000000000000000000000000000000000000000000088fff800000000000000
-0ddddf000ddddd000555550000111110000000000000000000000000000000000000000000000000000000000000000000000000000088222000000000000000
+00c66f0000cccc000144411000111110066066000000000000000000000000000000000000000000000000000000000000000000000088888000000000000000
+00c6fff000c6fff001343111000c4cd0666666600000000000000000000000000000000000000000000000000000000000000000000088fff800000000000000
+0cccff000cc6ff001144411100d444d00666660000000000000000000000000000000000000000000000000000000000000000000000883f3800000000000000
+0ddddd000dddddf01555551000111110006660000000000000000000000000000000000000000000000000000000000000000000000088fff800000000000000
+0ddddf000ddddd000555550000111110000600000000000000000000000000000000000000000000000000000000000000000000000088222000000000000000
 0ddddd000ddddd0004101400004d0d40000000000000000000000000000000000000000000000000000000000000000000000000000082222200000000000000
 dddddd000dddddd000505000000d0d00000000000000000000000000000000000000000000000000000000000000000000000000000022222200000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000022222200000000000000
@@ -331,6 +434,12 @@ dddddd000dddddd000505000000d0d00000000000000000000000000000000000000000000000000
 00011111100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00004004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00055005500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00077000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00700700000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __gff__
 0000000000000000000000000000000000000000000000000000000000000000010000000000000000000001020200000200000000000000000000000202000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

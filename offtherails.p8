@@ -62,6 +62,7 @@ function _init()
 	danger = {}
 	bullets = {}
 	create_soldier(32, 64)
+	
 end
 
 function fire()
@@ -240,6 +241,10 @@ function _draw()
 	for b in all(danger) do
 		spr(b.sprite, b.x, b.y)
 	end
+	
+	print('health', 1, 1, 6)
+	rectfill(1,8, player.health,9,8)
+
 end
 
 function _drawmapsprites()
@@ -255,8 +260,6 @@ function _drawmapsprites()
 		spr(42,09*8,08*8) --table 1
 		spr(42,16*8,08*8) --table 2
 		spr(42,20*8,08*8) --table 3
-
-
 
 	end
 -->8

@@ -25,8 +25,12 @@ function _init()
 player ={
 	movecount=1,
 	sprite = 1,
-	x = 32,
-	y = 64,
+	is_standing = true,
+	x = 32.0,
+	y = 64.0,
+	dy = 0.0,
+	dx = 0.0,
+	gravity = 0.3,
 	ydiff=0
 }
 
@@ -35,7 +39,8 @@ player ={
 queensguard is sprites 16-20
 16 is the idle sprite
 17-19 are moving sprites
-20 is jumping sprite
+20 is jumping spr
+ite
 21-25 is bames jond sprites
 21 is idle
 22-24 is running
@@ -110,7 +115,33 @@ function moving_soldier()
 	end
 end
 
-function _update()
+function move_player()
+
+	local tile_below_character = mget(player.x / 8, (player.y + 8) / 8)
+	local tile_below_character_collidable = fget(tile_below_character, 0)
+
+	if (tile_below_character_collidable) then
+		player.is_standing = true
+		player.dy = 0
+	end
+
+	if btnp(2) and player.is_standing then
+		player.dy = 3
+		player.is_standing = false
+	end
+
+	-- make dy negative because positive dy moves character downward
+	player.y += (-1 * player.dy)
+
+	if (not player.is_standing) then
+	 player.dy -= player.gravity
+	end
+	-- player.dy *= player.gravity
+
+end
+
+function _update60()
+
 	-- moving all of the bullets
 	for b in all(bullets) do
 		b.x+=b.dx
@@ -121,21 +152,22 @@ function _update()
 	end
 
 	-- moving player based on input
-	if btn(0) then
-		player.x-=1
-		player.sprite=1+player.movecount
-	end
-	if btn(1) then
-		player.x+=1
-		player.sprite =7+player.movecount
-	end
-	if btnp(2) then
-		player.y-=5
-		player.ydiff+=5
-	end
-	if btnp(4) then
-		fire()
-	end
+	move_player()
+	-- if btn(0) then
+	-- 	player.x-=1
+	-- 	player.sprite=1+player.movecount
+	-- end
+	-- if btn(1) then
+	-- 	player.x+=1
+	-- 	player.sprite =7+player.movecount
+	-- end
+	-- if btnp(2) then
+	-- 	player.y-=5
+	-- 	player.ydiff+=5
+	-- end
+	-- if btnp(4) then
+	-- 	fire()
+	-- end
 
 	-- switching to see animation
 	if player.movecount==3 then
@@ -199,6 +231,10 @@ function _draw()
 	for b in all(bullets) do
 		spr(b.sprite, b.x, b.y)
 	end
+	--
+	-- print(mget(player.x / 8, player.y / 8))
+	-- print((player.x/8).." "..((player.y + 8)/8))
+	-- print(fget(mget(player.x / 8, (player.y + 8) / 8)))
 end
 
 function _drawmapsprites()

@@ -27,6 +27,7 @@ function _init()
 		lives=3,
 		x = 32,
 		y = 64,
+		flipx=false,
 		ydiff=0
 	}	
 
@@ -94,7 +95,7 @@ function fire()
 		dy=0
 	}
 
-	if player.sprite<=4 then
+	if player.flipx==false then
 		bullet.dx=-2
 	end
 
@@ -168,12 +169,14 @@ function _update()
 
 	-- moving player based on input
 	if btn(0) then
+		player.flipx=false
 		player.x-=1
 		player.sprite=1+player.movecount
 	end
 	if btn(1) then
+		player.flipx=true
 		player.x+=1
-		player.sprite =7+player.movecount
+		player.sprite =1+player.movecount
 	end
 	if btnp(2) then
 		player.y-=5
@@ -261,8 +264,9 @@ function _draw()
  _drawmapsprites()
  _moveextra()
  spr(extra.sprite,extra.x,extra.y,1,1,extra.flipx,false)
+	
 	if player.lives>0 then
-		spr(player.sprite, player.x, player.y)
+		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
 	end
 	
 	for e in all(enemies) do

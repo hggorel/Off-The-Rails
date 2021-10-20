@@ -28,7 +28,9 @@ function _init()
 		x = 32,
 		y = 64,
 		flipx=false,
-		ydiff=0
+		ydiff=0,
+		jump_height=0,
+		jump_allowed=true
 	}	
 
 	--actors (enemies) table
@@ -178,18 +180,18 @@ function _update()
 		end
 	end
 	
-	if camx>100 then
-		camx=100
+	if camx>=130 then
+		camx=130
 	end
 	
 	-- moving player based on input
 	if btn(0) then
 		player.flipx=false
-		player.x-=1
+		if player.x>0 then
+			player.x-=1
+		end
 		player.sprite=1+player.movecount
-		--if map_x<0 then
-		--	map_x+=map_speed
-		--end
+		
 		if(player.x-camx<(64-allowance)) then
 			if camx<=0 then
 				camx=0
@@ -200,7 +202,9 @@ function _update()
 	end
 	if btn(1) then
 		player.flipx=true
-		player.x+=1
+		if player.x<240 then
+			player.x+=1
+		end
 		player.sprite =1+player.movecount
 		--map_x-=map_speed
 		if (player.x-camx>(64+allowance)) then
@@ -209,10 +213,18 @@ function _update()
 			end
 		end
 	end
-	if btnp(2) then
-		player.y-=5
-		player.ydiff+=5
-	end
+	if btn(2) and player.jump_allowed == true then
+ 	player.y-=3
+  player.ydiff+=3
+  player.jump_height +=3
+  if(player.jump_height > 70) then
+  	player.jump_allowed = false
+  end
+  if(player.ydiff == 0 and player.jump_allowed == false) then
+   player.jump_allowed = true
+   player.jump_height = 0
+		end
+ end
 	if btnp(4) then
 		fire()
 	end
@@ -230,7 +242,7 @@ function _update()
 	-- removing enemies that have been shot
 	for e in all(enemies) do
 		for b in all(bullets) do
-			if abs(b.x - e.x)<=1 then
+			if abs(b.x - e.x)<=1 and abs(b.y-e.y)<=5 then
 				del(enemies, e)
 				del(bullets, b)
 			end
@@ -238,7 +250,7 @@ function _update()
 	end
 	
 	for b in all(danger) do
-		if abs(b.x - player.x)<=1 then
+		if abs(b.x - player.x)<=1 and abs(b.y - player.y)<=5 then
 			player.x-=1
 			player.health-=5
 			del(danger, b)
@@ -265,6 +277,11 @@ function _update()
 	if player.ydiff > 0 then
 		player.y+=1
 		player.ydiff-=1
+	end
+	
+	if player.ydiff==0 then
+		player.jump_allowed=true
+		player.jump_height=0
 	end
 end
 

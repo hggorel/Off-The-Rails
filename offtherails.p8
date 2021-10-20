@@ -60,10 +60,17 @@ function _init()
 		flipx = false,
 		movecount = 0 --movecount format added to match hannah
 	}
+	
+	camx=0
 
 	danger = {}
 	bullets = {}
 	create_soldier(32, 64)
+	
+	map_x=0
+	map_speed=1
+	gameover=false
+	gamewin=false
 	
 	lives={}
 	heart1 = {
@@ -150,11 +157,15 @@ function moving_soldier()
 end
 
 function _update()
+
+	local allowance=28
+	local speed=1
+	
 	-- moving all of the bullets
 	for b in all(bullets) do
 		b.x+=b.dx
 		b.y+=b.dy
-		if b.x<0 or b.x > 128 or b.y < 0 or b.y>128 then
+		if b.x<camx-128 or b.x > camx+128 or b.y < 0 or b.y>128 then
 			del(bullets, b)
 		end
 	end
@@ -162,21 +173,41 @@ function _update()
 	for b in all(danger) do
 		b.x+=b.dx
 		b.y+=b.dy
-		if b.x<0 or b.x>128 or b.y<0 or b.y>128 then
+		if b.x<camx-128 or b.x>camx+128 or b.y<0 or b.y>128 then
 			del(danger, b)
 		end
 	end
-
+	
+	if camx>100 then
+		camx=100
+	end
+	
 	-- moving player based on input
 	if btn(0) then
 		player.flipx=false
 		player.x-=1
 		player.sprite=1+player.movecount
+		--if map_x<0 then
+		--	map_x+=map_speed
+		--end
+		if(player.x-camx<(64-allowance)) then
+			if camx<=0 then
+				camx=0
+			else
+				camx-=speed
+			end
+		end
 	end
 	if btn(1) then
 		player.flipx=true
 		player.x+=1
 		player.sprite =1+player.movecount
+		--map_x-=map_speed
+		if (player.x-camx>(64+allowance)) then
+			if camx<=120 then
+				camx+=speed
+			end
+		end
 	end
 	if btnp(2) then
 		player.y-=5
@@ -225,6 +256,7 @@ function _update()
 		end
 		if player.lives==0 then
 			del(lives, heart1)
+			gameover=true
 		end
 		--ask elise to make a sprite to show defeat??
 	end
@@ -258,33 +290,46 @@ tiles 33-34-49-50 are\
 	map is empty for level designer
 --]]
 function _draw()
- cls()
- --multiple in editor values by 8 to match map values
- map(0,0,0,0,32*8,9*8)
- _drawmapsprites()
- _moveextra()
- spr(extra.sprite,extra.x,extra.y,1,1,extra.flipx,false)
+	if gameover==false and gameover==false then
+ 	cls(5)
+ 	camera(camx, -16)
+ 	--camera(0, -16)
+ 	--multiple in editor values by 8 to match map values
+ 	--map(0,0,map_x,0,32*8,9*8)
+ 	--map(16,0,map_x+128, 0, 32*8, 9*8)
+ 	map(0, 0, 0, 0, 32*8, 9*8)
+ 	_drawmapsprites()
+ 	_moveextra()
+ 	spr(extra.sprite,extra.x,extra.y,1,1,extra.flipx,false)
+		if player.lives>0 then
+			spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
+		end
 	
-	if player.lives>0 then
-		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
+		for e in all(enemies) do
+			spr(e.sprite, e.x, e.y)
+		end
+		for b in all(bullets) do
+			spr(b.sprite, b.x, b.y)
+		end
+		for b in all(danger) do
+			spr(b.sprite, b.x, b.y)
+		end
+
+		camera()	
+		print('health', 1, 1, 6)
+		rectfill(1,8, player.health,9,8)
+		print('lives', 1, 13, 6)
+		for h in all(lives) do
+			spr(h.sprite, h.x, h.y)
+		end
 	end
 	
-	for e in all(enemies) do
-		spr(e.sprite, e.x, e.y)
+	if gameover then
+		-- draw new game over screen
+		cls(1)
+		print('game over', 46, 25, 7)
+		print('youll be executed tomorrow at dawn', 35, 35, 13)
 	end
-	for b in all(bullets) do
-		spr(b.sprite, b.x, b.y)
-	end
-	for b in all(danger) do
-		spr(b.sprite, b.x, b.y)
-	end
-	for h in all(lives) do
-		spr(h.sprite, h.x, h.y)
-	end
-	
-	print('health', 1, 1, 6)
-	rectfill(1,8, player.health,9,8)
-	print('lives', 1, 13, 6)
 end
 
 function _drawmapsprites()

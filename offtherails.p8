@@ -118,7 +118,7 @@ function fire()
 	add(bullets, bullet)
 end
 
-function shoot(startx, starty)
+function shoot(startx, starty, flipx)
 	local bullet= {
 		sprite=56,
 		x=startx,
@@ -127,12 +127,17 @@ function shoot(startx, starty)
 		dy=0
 	}
 	
+	if flipx then
+		bullet.dx = -1
+	end
+	
 	add(danger, bullet)
 end
 
 function create_soldier(newx, newy)
 	local actor ={
 		movecount=0,
+		flipx=false,
 		shootcount=0,
 		sprite = 16,
 		x = newx,
@@ -147,8 +152,10 @@ function moving_soldier()
 	for actor in all(enemies) do
 		if actor.movecount<5 then
 			actor.x+=1
+			actor.flipx=false
 		end
 		if actor.movecount>5 then
+			actor.flipx=true
 			actor.x-=1
 		end
 		
@@ -159,7 +166,7 @@ function moving_soldier()
 		end
 		
 		if actor.shootcount%20==0 then
-			shoot(actor.x, actor.y)
+			shoot(actor.x, actor.y, actor.flipx)
 		end
 		actor.shootcount+=1
 	end
@@ -392,7 +399,7 @@ function _draw()
 		end
 	
 		for e in all(enemies) do
-			spr(e.sprite, e.x, e.y)
+			spr(e.sprite, e.x, e.y, 1, 1, e.flipx, false)
 		end
 		for b in all(bullets) do
 			spr(b.sprite, b.x, b.y)

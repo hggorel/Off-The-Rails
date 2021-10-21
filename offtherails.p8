@@ -28,7 +28,15 @@ function _init()
 		x = 32,
 		y = 64,
 		flipx=false,
-		ydiff=0
+		ydiff=0,
+		--jump_height=0,
+		--jump_allowed=true
+		is_standing = true,
+		is_blocked_right = false,
+		is_blocked_left = false,
+		dy=0.0,
+		dx=0.0,
+		gravity=0.3
 	}	
 
 	--actors (enemies) table
@@ -60,10 +68,17 @@ function _init()
 		flipx = false,
 		movecount = 0 --movecount format added to match hannah
 	}
+	
+	camx=0
 
 	danger = {}
 	bullets = {}
 	create_soldier(32, 64)
+	
+	map_x=0
+	map_speed=1
+	gameover=false
+	gamewin=false
 	
 	lives={}
 	heart1 = {
@@ -149,39 +164,95 @@ function moving_soldier()
 	end
 end
 
-function _update()
-	-- moving all of the bullets
-	for b in all(bullets) do
-		b.x+=b.dx
-		b.y+=b.dy
-		if b.x<0 or b.x > 128 or b.y < 0 or b.y>128 then
-			del(bullets, b)
-		end
+function move_player()
+
+	local allowance=28
+	local speed=1
+	
+	local tile_below_character = mget(player.x / 8, (player.y + 8) / 8)
+ local tile_below_character_collidable = fget(tile_below_character, 0)
+	
+	local tile_right_character = mget((player.x +8)/8, player.y/8)
+	local tile_right_collidable = fget(tile_right_character, 0)
+	
+	local tile_left_character = mget((player.x)/8, player.y/8)
+	local tile_left_collidable = fget(tile_left_character, 0)
+
+ if (tile_below_character_collidable) then
+ 	player.is_standing = true
+  player.dy = 0
+ else
+ 	player.is_standing = false
+ 	player.dy-=player.gravity
+ end
+ 
+ if (tile_right_collidable) then
+		player.is_blocked_right = true
+	else
+		player.is_blocked_right = false
 	end
 	
-	for b in all(danger) do
-		b.x+=b.dx
-		b.y+=b.dy
-		if b.x<0 or b.x>128 or b.y<0 or b.y>128 then
-			del(danger, b)
+	if (tile_left_collidable) then
+		player.is_blocked_left = true
+	else
+		player.is_blocked_left = false
+	end
+ if btnp(2) and player.is_standing then
+  player.dy = 3
+  player.is_standing = false
+ end
+ -- moving player based on input
+	if btn(0) and not(player.is_blocked_left) then
+		player.flipx=false
+		if player.x>0 then
+			player.x-=1
+		end
+		player.sprite=1+player.movecount
+		
+		if(player.x-camx<(64-allowance)) then
+			if camx<=0 then
+				camx=0
+			else
+				camx-=speed
+			end
+		end
+		
+	end
+	if btn(1) and not(player.is_blocked_right) then
+		player.flipx=true
+		if player.x<240 then
+			player.x+=1
+		end
+		player.sprite =1+player.movecount
+		--map_x-=map_speed
+		if (player.x-camx>(64+allowance)) then
+			if camx<=120 then
+				camx+=speed
+			end
 		end
 	end
+	--if btn(2) and player.jump_allowed == true then
+ --	player.y-=3
+ -- player.ydiff+=3
+ -- player.jump_height +=3
+ -- if(player.jump_height > 70) then
+ -- 	player.jump_allowed = false
+ -- end
+ -- if(player.ydiff == 0 and player.jump_allowed == false) then
+ --  player.jump_allowed = true
+ --  player.jump_height = 0
+	--	end
+ --end
 
-	-- moving player based on input
-	if btn(0) then
-		player.flipx=false
-		player.x-=1
-		player.sprite=1+player.movecount
-	end
-	if btn(1) then
-		player.flipx=true
-		player.x+=1
-		player.sprite =1+player.movecount
-	end
-	if btnp(2) then
-		player.y-=5
-		player.ydiff+=5
-	end
+ -- make dy negative because positive dy moves character downward
+ player.y += (-1 * player.dy)
+
+ --if (not player.is_standing) then
+ -- player.dy -= player.gravity
+ --end
+ -- player.dy *= player.gravity
+ 
+ 
 	if btnp(4) then
 		fire()
 	end
@@ -193,13 +264,39 @@ function _update()
 	if player.movecount<3 then
 		player.movecount+=1
 	end
+end
+
+function _update()
+	
+	-- moving all of the bullets
+	for b in all(bullets) do
+		b.x+=b.dx
+		b.y+=b.dy
+		if b.x<camx-128 or b.x > camx+128 or b.y < 0 or b.y>128 then
+			del(bullets, b)
+		end
+	end
+	
+	for b in all(danger) do
+		b.x+=b.dx
+		b.y+=b.dy
+		if b.x<camx-128 or b.x>camx+128 or b.y<0 or b.y>128 then
+			del(danger, b)
+		end
+	end
+	
+	if camx>=130 then
+		camx=130
+	end
+	
+	move_player()
 
 	moving_soldier()
 
 	-- removing enemies that have been shot
 	for e in all(enemies) do
 		for b in all(bullets) do
-			if abs(b.x - e.x)<=1 then
+			if abs(b.x - e.x)<=1 and abs(b.y-e.y)<=5 then
 				del(enemies, e)
 				del(bullets, b)
 			end
@@ -207,7 +304,7 @@ function _update()
 	end
 	
 	for b in all(danger) do
-		if abs(b.x - player.x)<=1 then
+		if abs(b.x - player.x)<=1 and abs(b.y - player.y)<=5 then
 			player.x-=1
 			player.health-=5
 			del(danger, b)
@@ -225,6 +322,7 @@ function _update()
 		end
 		if player.lives==0 then
 			del(lives, heart1)
+			gameover=true
 		end
 		--ask elise to make a sprite to show defeat??
 	end
@@ -233,6 +331,11 @@ function _update()
 	if player.ydiff > 0 then
 		player.y+=1
 		player.ydiff-=1
+	end
+	
+	if player.ydiff==0 then
+	 player.jump_allowed=true
+		player.jump_height=0
 	end
 end
 
@@ -258,33 +361,46 @@ tiles 33-34-49-50 are\
 	map is empty for level designer
 --]]
 function _draw()
- cls()
- --multiple in editor values by 8 to match map values
- map(0,0,0,0,32*8,9*8)
- _drawmapsprites()
- _moveextra()
- spr(extra.sprite,extra.x,extra.y,1,1,extra.flipx,false)
+	if gameover==false and gameover==false then
+ 	cls(5)
+ 	camera(camx, -16)
+ 	--camera(0, -16)
+ 	--multiple in editor values by 8 to match map values
+ 	--map(0,0,map_x,0,32*8,9*8)
+ 	--map(16,0,map_x+128, 0, 32*8, 9*8)
+ 	map(0, 0, 0, 0, 32*8, 9*8)
+ 	_drawmapsprites()
+ 	_moveextra()
+ 	spr(extra.sprite,extra.x,extra.y,1,1,extra.flipx,false)
+		if player.lives>0 then
+			spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
+		end
 	
-	if player.lives>0 then
-		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
+		for e in all(enemies) do
+			spr(e.sprite, e.x, e.y)
+		end
+		for b in all(bullets) do
+			spr(b.sprite, b.x, b.y)
+		end
+		for b in all(danger) do
+			spr(b.sprite, b.x, b.y)
+		end
+
+		camera()	
+		print('health', 1, 1, 6)
+		rectfill(1,8, player.health,9,8)
+		print('lives', 1, 13, 6)
+		for h in all(lives) do
+			spr(h.sprite, h.x, h.y)
+		end
 	end
 	
-	for e in all(enemies) do
-		spr(e.sprite, e.x, e.y)
+	if gameover then
+		-- draw new game over screen
+		cls(1)
+		print('game over', 46, 25, 7)
+		print('youll be executed tomorrow at dawn', 35, 35, 13)
 	end
-	for b in all(bullets) do
-		spr(b.sprite, b.x, b.y)
-	end
-	for b in all(danger) do
-		spr(b.sprite, b.x, b.y)
-	end
-	for h in all(lives) do
-		spr(h.sprite, h.x, h.y)
-	end
-	
-	print('health', 1, 1, 6)
-	rectfill(1,8, player.health,9,8)
-	print('lives', 1, 13, 6)
 end
 
 function _drawmapsprites()

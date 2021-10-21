@@ -74,6 +74,7 @@ function _init()
 	danger = {}
 	bullets = {}
 	create_soldier(32, 64)
+	create_soldier(160, 64)
 	
 	map_x=0
 	map_speed=1
@@ -252,6 +253,16 @@ function move_player()
  --end
  -- player.dy *= player.gravity
  
+ if btnp(3) then
+ 	local tile_character_on = mget(player.x / 8, player.y / 8)
+ 	if tile_character_on == 60 then
+ 		mset(player.x/8, player.y/8, 61)
+ 		mset(player.x/8, (player.y-8)/8, 45)
+ 	end
+ 	if tile_character_on ==61 then
+ 		gamewin=true
+ 	end
+ end
  
 	if btnp(4) then
 		fire()
@@ -305,7 +316,11 @@ function _update()
 	
 	for b in all(danger) do
 		if abs(b.x - player.x)<=1 and abs(b.y - player.y)<=5 then
-			player.x-=1
+			if b.dx>0 then
+				player.x+=1
+			else
+				player.x-=1
+			end
 			player.health-=5
 			del(danger, b)
 		end
@@ -398,8 +413,18 @@ function _draw()
 	if gameover then
 		-- draw new game over screen
 		cls(1)
-		print('game over', 46, 25, 7)
-		print('youll be executed tomorrow at dawn', 35, 35, 13)
+		print('game over', 7)
+		print('youll be executed', 13)
+		print('tomorrow at dawn', 13)
+		print('your village gets nothing', 13)
+	end
+	
+	if gamewin then
+		-- draw won level screen
+		cls(2)
+		print('level completed!', 7)
+		print('next levels are', 13)
+		print('under construction', 13)
 	end
 end
 

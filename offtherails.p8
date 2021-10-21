@@ -29,8 +29,14 @@ function _init()
 		y = 64,
 		flipx=false,
 		ydiff=0,
-		jump_height=0,
-		jump_allowed=true
+		--jump_height=0,
+		--jump_allowed=true
+		is_standing = true,
+		is_blocked_right = false,
+		is_blocked_left = false,
+		dy=0.0,
+		dx=0.0,
+		gravity=0.3
 	}	
 
 	--actors (enemies) table
@@ -158,10 +164,109 @@ function moving_soldier()
 	end
 end
 
-function _update()
+function move_player()
 
 	local allowance=28
 	local speed=1
+	
+	local tile_below_character = mget(player.x / 8, (player.y + 8) / 8)
+ local tile_below_character_collidable = fget(tile_below_character, 0)
+	
+	local tile_right_character = mget((player.x +8)/8, player.y/8)
+	local tile_right_collidable = fget(tile_right_character, 0)
+	
+	local tile_left_character = mget((player.x)/8, player.y/8)
+	local tile_left_collidable = fget(tile_left_character, 0)
+
+ if (tile_below_character_collidable) then
+ 	player.is_standing = true
+  player.dy = 0
+ else
+ 	player.is_standing = false
+ 	player.dy-=player.gravity
+ end
+ 
+ if (tile_right_collidable) then
+		player.is_blocked_right = true
+	else
+		player.is_blocked_right = false
+	end
+	
+	if (tile_left_collidable) then
+		player.is_blocked_left = true
+	else
+		player.is_blocked_left = false
+	end
+ if btnp(2) and player.is_standing then
+  player.dy = 3
+  player.is_standing = false
+ end
+ -- moving player based on input
+	if btn(0) and not(player.is_blocked_left) then
+		player.flipx=false
+		if player.x>0 then
+			player.x-=1
+		end
+		player.sprite=1+player.movecount
+		
+		if(player.x-camx<(64-allowance)) then
+			if camx<=0 then
+				camx=0
+			else
+				camx-=speed
+			end
+		end
+		
+	end
+	if btn(1) and not(player.is_blocked_right) then
+		player.flipx=true
+		if player.x<240 then
+			player.x+=1
+		end
+		player.sprite =1+player.movecount
+		--map_x-=map_speed
+		if (player.x-camx>(64+allowance)) then
+			if camx<=120 then
+				camx+=speed
+			end
+		end
+	end
+	--if btn(2) and player.jump_allowed == true then
+ --	player.y-=3
+ -- player.ydiff+=3
+ -- player.jump_height +=3
+ -- if(player.jump_height > 70) then
+ -- 	player.jump_allowed = false
+ -- end
+ -- if(player.ydiff == 0 and player.jump_allowed == false) then
+ --  player.jump_allowed = true
+ --  player.jump_height = 0
+	--	end
+ --end
+
+ -- make dy negative because positive dy moves character downward
+ player.y += (-1 * player.dy)
+
+ --if (not player.is_standing) then
+ -- player.dy -= player.gravity
+ --end
+ -- player.dy *= player.gravity
+ 
+ 
+	if btnp(4) then
+		fire()
+	end
+
+	-- switching to see animation
+	if player.movecount==3 then
+		player.movecount=1
+	end
+	if player.movecount<3 then
+		player.movecount+=1
+	end
+end
+
+function _update()
 	
 	-- moving all of the bullets
 	for b in all(bullets) do
@@ -184,58 +289,7 @@ function _update()
 		camx=130
 	end
 	
-	-- moving player based on input
-	if btn(0) then
-		player.flipx=false
-		if player.x>0 then
-			player.x-=1
-		end
-		player.sprite=1+player.movecount
-		
-		if(player.x-camx<(64-allowance)) then
-			if camx<=0 then
-				camx=0
-			else
-				camx-=speed
-			end
-		end
-	end
-	if btn(1) then
-		player.flipx=true
-		if player.x<240 then
-			player.x+=1
-		end
-		player.sprite =1+player.movecount
-		--map_x-=map_speed
-		if (player.x-camx>(64+allowance)) then
-			if camx<=120 then
-				camx+=speed
-			end
-		end
-	end
-	if btn(2) and player.jump_allowed == true then
- 	player.y-=3
-  player.ydiff+=3
-  player.jump_height +=3
-  if(player.jump_height > 70) then
-  	player.jump_allowed = false
-  end
-  if(player.ydiff == 0 and player.jump_allowed == false) then
-   player.jump_allowed = true
-   player.jump_height = 0
-		end
- end
-	if btnp(4) then
-		fire()
-	end
-
-	-- switching to see animation
-	if player.movecount==3 then
-		player.movecount=1
-	end
-	if player.movecount<3 then
-		player.movecount+=1
-	end
+	move_player()
 
 	moving_soldier()
 
@@ -280,7 +334,7 @@ function _update()
 	end
 	
 	if player.ydiff==0 then
-		player.jump_allowed=true
+	 player.jump_allowed=true
 		player.jump_height=0
 	end
 end

@@ -47,13 +47,19 @@ this is present. The added left/ right movement is nice
 ### notes
 
 -speed is unsatisfying-controls feels laggy, but it works well
+
 -animation, obviously, needs to be implemented (that will be for playtest 1, in a few weeks)
+
 -game over screen is satisfying
+
 -on game over screens, i could make sprites/ figure out the pngs as string trick to make them more visually interesting (or make the pngs and someone else could figure that out : ( we'll see sorry)
 
 *bugs found*
+
 there is a bug where Mable can get stuck jumping up from the sunken exit area could be a collission or gravity issue?
 
 I'll add the screenshots here, later
+
 -if Mable gets shot while jumping/ facing left, sometimes she will get shot off the screen (below the floor). I did not get a screenshot of this. I have no idea what could cause this
+
 -I'm guessing it is also a collision issue, where because of theshot pushing Mable back, it also pushes her down slightly (sometimes), then the collission stops checking beneath her.

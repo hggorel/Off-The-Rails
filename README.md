@@ -1,26 +1,47 @@
 # Off-The-Rails
 ## Quality Assurance Read Me
 >very fun very wild game
+
 *Features checklist 10/21/2021/ - testing protoype from hannah-draft*
+
 >side scroller with platformer aspects 
+
 this is present and looks good
+
 >keybound player movements 
+
 this is present and works well. On the first level of the game we should give the player instructions on which keys tie to which actions (z may not be the obvious shooting mechanic to someone)
+
 >action movie style gravity 
+
 it is very action movie style
+
 >brief enemy battles
+
 there are fights with enemies. For a first level, I think this is very nice
+
 >small puzzles 
+
 (minigame--NOT FOR PROTOTYPE)this is irrelevant
+
 >health systems 
+
 this is present. works great for the player
+
 >basic enemy ai 
+
 this is present. The added left/ right movement is nice
+
 >different shot patterns 
+
 (connected to leveing--NOT FOR PROTOTYPE)
+
 >3 different weapons 
+
 (connected to leveling--NOT FOR PROTOTYPE)
+
 >Many unique train cars
+
 (connected to leveling--NOT FOR PROTOTYPE)
 
 ### notes

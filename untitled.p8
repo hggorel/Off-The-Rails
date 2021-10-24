@@ -4,6 +4,7 @@ __lua__
 --this is an animation file just
 --for making animations for output
 function _init()
+	gameinit()
 	titleinit()
 end
 
@@ -12,7 +13,11 @@ function titleinit()
 end
 
 function gameinit()
-	mode = 0
+	mode = 1
+end
+
+function pauseinit()
+	mode = 2
 end
 
 --131-138
@@ -38,9 +43,11 @@ a=.25
 -->8
 function _update()
 	if(mode == 0) then
-		titleupdate()
-	else
-		gameupdate()
+		titleupdate() 
+	elseif mode == 2 then
+		pauseupdate() 
+	else 
+		gameupdate() 
 	end
 end
 
@@ -52,13 +59,24 @@ function titleupdate()
 end	
 
 function gameupdate()
-	print("game animation soon")
+	if(btnp(⬆️) and btnp(⬇️)) then
+		mode = 2 --pause screen
+	end	
+end
 
+function pauseupdate()
+	if(btnp(⬆️) and btnp(⬇️)) then
+		mode = 1
+	end
 end
 -->8
 function _draw()
 	if mode == 0 then
 		titledraw()
+	elseif mode == 2 then
+		pausedraw()
+	else
+		gamedraw() --mode only if 1
 	end
 
 end
@@ -94,6 +112,23 @@ if smoke.sprite > 149 then
 
 end
 
+end
+
+function pausedraw()
+	color(14)
+	pal(14,131,1) --replace pink with 131
+	rectfill(8, 8, 119, 119)
+	print("inventory",10,10,7)
+	spr(76,16,16)
+	--selection for movement through inventroy should be btnp
+	--inventory square by square
+
+end
+
+function gamedraw()
+	cls()
+	rectfill(0,0,132,132,3)
+	print("game animation soon",1,1,0)
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000003300000000000

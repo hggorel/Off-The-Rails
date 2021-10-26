@@ -20,6 +20,9 @@ function pauseinit()
 	mode = 2
 end
 
+--click count for text display
+cc = 0 --to be incremented and used for printing text
+
 --131-138
 train={
 x=1*8,
@@ -47,6 +50,7 @@ sp=0,
 w=8,
 h=2
 }
+
 
 
 
@@ -141,8 +145,9 @@ end
 
 function gamedraw()
 	cls()
-	fillp(ˇ)
-	color(colstut.x) --trying?
+--	fillp(ˇ)
+--	color(colstut.x) --trying?
+	color(1)
 	rectfill(0,0,132,132)
 	color(7)
 	pal(7,135,1)
@@ -166,9 +171,18 @@ end
 
 function text1()
 	print("north england, 196x")
-	for a=1,3 do
-		print(".",a+4,5)
-	end
+		if btnp(❎) then
+				cc += 1 --cc should = 1
+			end
+		if cc == 0 then	
+		print(".",4,5)
+		end
+		if cc == 1 then
+		print(". .",4,5)
+		end
+		if  cc > 1 then
+		print(". . .",4,5)
+		end
 end
 
 --no idea what to say here

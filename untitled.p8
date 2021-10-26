@@ -51,6 +51,13 @@ w=8,
 h=2
 }
 
+mable={
+sp=105,
+w=2,
+h=2,
+tm=0
+}
+
 
 
 
@@ -66,6 +73,7 @@ function _update()
 	end
 	--continuous things
 	colorstut()
+	mb1anim()
 end
 
 
@@ -152,6 +160,9 @@ function gamedraw()
 	color(7)
 	pal(7,135,1)
 	text1()
+	if cc > 2 then
+	train1()
+	end
 end
 
 --for a color shifting background
@@ -161,6 +172,40 @@ function colorstut()
 		colstut.x = 1
 	end
 end
+
+function train1()
+if btnp(❎) then
+				cc += 1 --cc should = 2
+			end
+	cls(1)
+	map(0,0,0,31,14*8,6*8)
+	spr(82,71,63) --table 1
+	spr(82,29,63) --table 2
+	spr(81,38,63) -- bench
+	spr(81,20,63,1,1,true,false) --bench
+	spr(81,63,63,1,1,true,false) --bench 1
+	spr(mable.sp,73,55,2,2)
+
+end
+
+--animation function
+--timing is tested for for larger animation
+--so frames always look nice
+function mb1anim()
+	mable.tm +=.5
+	if mable.tm > 2 then
+		if mable.sp == 105 then
+			mable.sp = 107
+		elseif mable.sp == 107 then
+			mable.sp = 109
+		else
+			mable.sp = 105
+			end
+		mable.tm = 0
+	end
+end
+	
+
 -->8
 --text for trailer
 --trying to get fade in text??

@@ -205,10 +205,14 @@ function gamedraw()
 	color(7)
 	pal(7,135,1)
 	text1()
-	if cc <= 7 and cc >= 3 then
-		townmap() --last call is cc 6
+	if cc <= 8 and cc >= 3 then
+	text3()
+	--	townmap() --last call is cc 6
 	end
-	if cc > 7 then --numb will change with more text added in
+	if cc >= 9 and cc <= 11 then
+		text3()
+	end
+	if cc > 12 then --numb will change with more text added in
 	train1()
 	end
 end
@@ -363,10 +367,27 @@ function text2()
 end
 
 function text3()
-	print("the idea is simple:")
-	print("steal the queen's crown")
-	print("then get away with it")
+cls()
+color(11)
+
+if cc >= 3 then
+--	print("a very fun--",20,30,7) 
+--	print("very wild game",15,40,7)
+print("shoot with 'z' and",20,30,7)
+print("move with the arrow keys",15,40,7)
 end
+if cc >= 4 then
+cls()
+print("as you dash through",20,30,7)
+print("train cars",30,40,7)
+print("fight enemies",25,50,7)
+print("and make your get away on",2,60,7)
+print("your stolen train",20,70,7)
+--	print("nostalgic for arcade platformers",0,30,7)
+--	print("but not for british monarchism",2,40,7)
+end
+end
+
 
 
 __gfx__

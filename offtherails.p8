@@ -3,13 +3,14 @@ version 32
 __lua__
 --basic set up sections
 --in the game
-
+--use inventory for cutscene
 
 function _init()
 	mode = 0 --for title call
-	if btn(4) then
-		mode = 1
+	if mode == 0 then
+		titleupdate()
 	end
+
 	--flags (global)
 	--flag 0 = floor/coundary wall
 	--flag 1 = interactable/door?
@@ -282,9 +283,9 @@ function move_player()
 	
 	--we dont use 5 yet i think?
 	--so this is for title to game
-	if btnp(5) and mode == 0 then
-		mode = 1
-	end
+--	if btnp(5) and mode == 0 then
+	--	mode = 1
+--	end --redundant code
 
 	-- switching to see animation
 	if player.movecount==3 then
@@ -297,6 +298,13 @@ function move_player()
 end
 
 function _update()
+	if mode == 2 then
+		pause = true
+		pauseupdate()
+	else
+		pause = false
+		gameupdate()
+	end
 	
 	-- moving all of the bullets
 	for b in all(bullets) do
@@ -374,6 +382,28 @@ function _update()
 	end
 end
 
+--changing modes
+function titleupdate()
+	if btn(❎) then
+		mode = 1
+	end
+end
+
+function pauseupdate()
+	if(btnp(❎) ) then
+		mode = 1
+	end
+end
+
+--x only used this way
+function gameupdate()
+	if(btnp(❎) ) then
+		mode = 2 --pause screen
+	end
+end
+
+
+
 --glocal sprite tables (for nongame screens)
 	train={
 	x=1*8,
@@ -390,10 +420,20 @@ end
 	a=.25
 	}
 	
-title={
+title={ --info for the title sprite
 sp=0,
 w=8,
 h=2
+}
+
+--inventory select box
+sel={ --short for select, an existing command
+x=18,
+y=18,
+move=15,
+minx=19,
+maxx=79,
+place=0
 }
 -->8
 --map section
@@ -418,6 +458,8 @@ tiles 33-34-49-50 are\
 function _draw()
 	if mode == 0 then
 		titledraw()
+	elseif mode > 1 then
+		pausedraw()
 	else
 		gamedraw() --mode only if 1
 	end
@@ -475,6 +517,7 @@ function gamedraw()
 		print('next levels are', 13)
 		print('under construction', 13)
 	end
+	
 end
 
 function _drawmapsprites()
@@ -527,14 +570,35 @@ end
 end
 
 function pausedraw()
-	color(14)
-	pal(14,131,1) --replace pink with 131
-	rectfill(8, 8, 119, 119)
-	print("inventory",10,10,7)
-	spr(11,16,16)
-	--selection for movement through inventroy should be btnp
-	--inventory square by square
+	--	running = false
+		rectmove()
+		color(14)
+		pal(14,131,1) --replace pink with 131
+		rectfill(8, 8, 119, 119)
+		print("inventory",10,10,7)
+		spr(11,20,20) --queens crown
+		spr(57,35,20) --gun
+		rect(sel.x,sel.y,sel.x+12,sel.y+12,8)
+		if sel.place == 0 then
+			print("the queen's crown:", 20,40,7)
+			print("you stole this.",25,50,7)
+		end
+		if sel.place == 1 then
+			print("your trusty pistol:",20,40,7)
+			print("you should equip this.",15,50,7)
+		end
+end
 
+--for inventory
+function rectmove()
+	if btnp(➡️) and sel.x < sel.maxx then
+		sel.x += sel.move
+		sel.place += 1 --for print out
+	end
+	if btnp(⬅️) and sel.x > sel.minx then
+		sel.x -= sel.move
+		sel.place -=1
+	end
 end
 -->8
 --movement section
@@ -568,20 +632,6 @@ function _moveextra()
 
 
 	end
--->8
---update calls for future integration
-
-function gameupdate()
-	if(btnp(⬆️) and btnp(⬇️)) then
-		mode = 2 --pause screen
-	end	
-end
-
-function pauseupdate()
-	if(btnp(⬆️) and btnp(⬇️)) then
-		mode = 1
-	end
-end
 __gfx__
 00000000008888800088880000888800008888000088880000888800008888000088888000888880008888000000a00000777700000ccc000000100000000000
 0000000008fff88000f8888000f8888000f8888000f8888000f8888000f8888008fff88008fff88008fff880000aa0007071716000c66f000001110000000000
@@ -609,11 +659,11 @@ aaaaaaaa360000000000006388112288811008811888888118881133113333333113311005444445
 99999999336666666666663300110000011000011000000110000000110000000110000005500055005555004444444449555594400009943600006300000000
 0000000033333333333333330000000000000000cccccccc00000000000000000000000000000000000000000000000049999994400009943600006300000000
 000aa000b3b3b3b3333333330000000007700770cccccccc000d0000000000000000000000000000000000000000000045999994400005943600006300000000
-00a00a003b3b3b3b333333330000000077770000cccccccc00ddd000000000000000000000000000000000000000000045999994400005943600006300000000
-4544445433333333333333330000000000000000cccccccc0ddddd00000000000000000000000000000000000000000049999994400009943600006300000000
-4544445433333333333333330077700000000000ccccccccddddddd00dddd0000066000000000000000000000000000049999994400009943600006300000000
-4544445433333333333333330777777000000700ccccccccddddddddddddddd00000000000000000000000000000000049999994400009943600006300000000
-45444454bbbbbbbb333333337777777700077770ccccccccdddddddddddddddd0000000000000000000000000000000049999994400009943600006300000000
+00a00a003b3b3b3b333333330000000077770000cccccccc00ddd000000000000000000001555550000000000000000045999994400005943600006300000000
+4544445433333333333333330000000000000000cccccccc0ddddd00000000000000000004111500000000000000000049999994400009943600006300000000
+4544445433333333333333330077700000000000ccccccccddddddd00dddd0000066000044500000000000000000000049999994400009943600006300000000
+4544445433333333333333330777777000000700ccccccccddddddddddddddd00000000044000000000000000000000049999994400009943600006300000000
+45444454bbbbbbbb333333337777777700077770ccccccccdddddddddddddddd0000000044000000000000000000000049999994400009943600006300000000
 4544445433333333333333330000000000000000ccccccccdddddddddddddddd0000000000000000000000000000000049999994400000943666666300000000
 000ccc0000000000001111100001111000000000000000000c0000000000000000000000000000000ca0000000c0000000000000000000000000000000000000
 00c66f0000cccc0001444110001111100660660007000000000000006070000067000000670000000cca7000000a000000000000000088888000000000000000

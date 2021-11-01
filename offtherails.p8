@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 32
+version 33
 __lua__
 --basic set up sections
 --in the game
@@ -34,8 +34,8 @@ function _init()
 		y = 64,
 		flipx=false,
 		ydiff=0,
-		--jump_height=0,
-		--jump_allowed=true
+		jump_height=0,
+		jump_allowed=true,
 		is_standing = true,
 		is_blocked_right = false,
 		is_blocked_left = false,
@@ -185,6 +185,9 @@ function move_player()
 	local tile_below_character = mget(player.x / 8, (player.y + 8) / 8)
  local tile_below_character_collidable = fget(tile_below_character, 0)
 
+	local tile_above = mget(player.x / 8, (player.y) / 8)
+ local tile_above_character_collidable = fget(tile_above, 0)
+
 	local tile_right_character = mget((player.x +8)/8, player.y/8)
 	local tile_right_collidable = fget(tile_right_character, 0)
 
@@ -193,11 +196,22 @@ function move_player()
 
  if (tile_below_character_collidable) then
  	player.is_standing = true
+ 	player.jumpheight=0
+ 	player.jump_allowed=true
   player.dy = 0
  else
  	player.is_standing = false
+ 	if player.jumpheight < 45 then
+ 		player.jump_allowed = true
+ 	end
  	player.dy-=player.gravity
  end
+ 
+ if (tile_above_collidable) then
+ 	player.jump_allowed=false
+ 	player.is_standing=false
+ 	player.dy=(-1*player.gravity)
+ end	
 
  if (tile_right_collidable) then
 		player.is_blocked_right = true
@@ -210,10 +224,7 @@ function move_player()
 	else
 		player.is_blocked_left = false
 	end
- if btnp(2) and player.is_standing then
-  player.dy = 3
-  player.is_standing = false
- end
+
  -- moving player based on input
 	if btn(0) and not(player.is_blocked_left) then
 		player.flipx=false
@@ -244,18 +255,19 @@ function move_player()
 			end
 		end
 	end
-	--if btn(2) and player.jump_allowed == true then
- --	player.y-=3
- -- player.ydiff+=3
- -- player.jump_height +=3
- -- if(player.jump_height > 70) then
- -- 	player.jump_allowed = false
- -- end
- -- if(player.ydiff == 0 and player.jump_allowed == false) then
- --  player.jump_allowed = true
- --  player.jump_height = 0
-	--	end
- --end
+	
+	if btn(2) and player.jump_allowed == true then
+ 	player.dy = 3
+  player.jump_height +=3
+  if(player.jump_height > 45) then
+  	player.jump_allowed = false
+  	player.dy = (-1 *player.gravity)
+  end
+  if(player.is_standing and player.jump_allowed == false) then
+   player.jump_allowed = true
+   player.jump_height = 0
+		end
+ end
 
  -- make dy negative because positive dy moves character downward
  player.y += (-1 * player.dy)
@@ -362,16 +374,6 @@ function _update()
 		--^ this will be sprite 10 :)
 	end
 
-	--gravity
-	if player.ydiff > 0 then
-		player.y+=1
-		player.ydiff-=1
-	end
-
-	if player.ydiff==0 then
-	 player.jump_allowed=true
-		player.jump_height=0
-	end
 end
 
 --glocal sprite tables (for nongame screens)

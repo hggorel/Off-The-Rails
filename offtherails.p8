@@ -37,10 +37,11 @@ function _init()
 		is_standing = true,
 		is_blocked_right = false,
 		is_blocked_left = false,
-		jump_force=3.0,
+		base_jump_force=1.0,
+		jump_force=base_jump_force,
 		dy=0.0,
 		dx=0.0,
-		gravity=0.3
+		gravity=0.1
 	}
 
 	--actors (enemies) table
@@ -176,10 +177,14 @@ function moving_soldier()
 	end
 end
 
+--function check_collide_below2
+
 function move_player()
 
 	local allowance=28
 	local speed=1
+
+	check_collide_below()
 
 	local tile_below_character = mget(player.x / 8, (player.y + 8) / 8)
  local tile_below_character_collidable = fget(tile_below_character, 0)
@@ -195,7 +200,7 @@ function move_player()
 
  if (tile_below_character_collidable) then
  	player.is_standing = true
-		player.jump_force = 3.0
+		player.jump_force = player.base_jump_force
   player.dy = 0
  end
 
@@ -248,18 +253,27 @@ function move_player()
 		end
 	end
 
-	if btn(2) and player.jump_allowed then
+	if btn(2) and not player.is_standing then
+  player.dy += player.jump_force
+ end
 
-		
-
+	if btnp(2) and player.is_standing then
+		player.dy += player.jump_force
+		player.is_standing = false
  end
 
  -- make dy negative because positive dy moves character downward
  player.y += (-1 * player.dy)
 
- --if (not player.is_standing) then
- -- player.dy -= player.gravity
- --end
+	if(player.jump_force > 0) then
+	 player.jump_force -= 0.3
+ else
+		player.jump_force = 0.0
+	end
+
+ if (not player.is_standing) then
+  player.dy -= player.gravity
+ end
  -- player.dy *= player.gravity
 
  if btnp(3) then
@@ -408,6 +422,7 @@ function _draw()
 	else
 		gamedraw() --mode only if 1
 	end
+	print(player.dy, 100, 100)
 end
 
 function gamedraw()

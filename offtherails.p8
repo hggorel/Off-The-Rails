@@ -200,18 +200,18 @@ function move_player()
  	player.jump_allowed=true
   player.dy = 0
  else
- 	player.is_standing = false
- 	if player.jumpheight < 45 then
- 		player.jump_allowed = true
- 	end
- 	player.dy-=player.gravity
+ 	--player.is_standing = false
+ --	if player.jumpheight < 45 then
+ 	--	player.jump_allowed = true
+ 	--end
+ 	--player.dy-=player.gravity
  end
- 
+
  if (tile_above_collidable) then
  	player.jump_allowed=false
  	player.is_standing=false
  	player.dy=(-1*player.gravity)
- end	
+ end
 
  if (tile_right_collidable) then
 		player.is_blocked_right = true
@@ -255,18 +255,18 @@ function move_player()
 			end
 		end
 	end
-	
-	if btn(2) and player.jump_allowed == true then
- 	player.dy = 3
+
+	if btn(2) and player.jump_allowed then
+ 	player.dy += 3
   player.jump_height +=3
-  if(player.jump_height > 45) then
-  	player.jump_allowed = false
-  	player.dy = (-1 *player.gravity)
-  end
-  if(player.is_standing and player.jump_allowed == false) then
-   player.jump_allowed = true
-   player.jump_height = 0
-		end
+  --if(player.jump_height > 45) then
+  --	player.jump_allowed = false
+  --	player.dy = (-1 *player.gravity)
+  --end
+  --if(player.is_standing and player.jump_allowed == false) then
+  -- player.jump_allowed = true
+  -- player.jump_height = 0
+		--end
  end
 
  -- make dy negative because positive dy moves character downward

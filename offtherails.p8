@@ -41,7 +41,7 @@ function _init()
 		is_blocked_left = false,
 		dy=0.0,
 		dx=0.0,
-		gravity=0.3
+		gravity=0.5
 	}
 
 	--actors (enemies) table
@@ -80,6 +80,7 @@ function _init()
 	bullets = {}
 	create_soldier(32, 64)
 	create_soldier(160, 64)
+	create_herlock(45, 64)
 
 	map_x=0
 	map_speed=1
@@ -123,7 +124,7 @@ function fire()
 	add(bullets, bullet)
 end
 
-function shoot(startx, starty, flipx)
+function basic_shoot(startx, starty, flipx)
 	local bullet= {
 		sprite=56,
 		x=startx,
@@ -139,6 +140,30 @@ function shoot(startx, starty, flipx)
 	add(danger, bullet)
 end
 
+function herlock_shoot(startx, starty, targetx, targety)
+	local bullet = {
+		sprite = 56,
+		speed = 1,
+		x = startx,
+		y = starty,
+		dx =0,
+		dy =0
+	}
+	
+	local trajectory_x = targetx - startx
+	local trajectory_y = targety - starty
+	
+	local trajectory_len = sqrt(trajectory_x^2 + trajectory_y^2)
+	
+	local len_to_speed = bullet.speed / trajectory_len
+	
+	bullet.dx = trajectory_x * len_to_speed
+	bullet.dy = trajectory_y * len_to_speed
+	
+	add(danger, bullet)
+
+end
+
 function create_soldier(newx, newy)
 	local actor ={
 		movecount=0,
@@ -150,30 +175,92 @@ function create_soldier(newx, newy)
 	}
 
 	add(enemies, actor)
+end
 
+function create_bames(newx, newy)
+	local actor = {
+		movecount=0,
+		flipx=false,
+		shootcount=0,
+		sprite = 21,
+		x = newx,
+		y = newy
+	}
+	
+	add(enemies, actor)
+end
+
+function create_herlock(newx, newy)
+	local actor = {
+		movecount=0,
+		flipx=false,
+		shootcount=0,
+		sprite=26,
+		x = newx,
+		y = newy
+	}
+
+	add(enemies, actor)
 end
 
 function moving_soldier()
 	for actor in all(enemies) do
-		if actor.movecount<5 then
+		-- if the enemy is a soldier
+		if actor.sprite <=20 and actor.sprite >=16 then
+			if actor.movecount<5 then
+				actor.x+=1
+				actor.flipx=false
+			end
+			if actor.movecount>5 then
+				actor.flipx=true
+				actor.x-=1
+			end
+
+			if actor.movecount<10 then
+				actor.movecount+=1
+			else
+				actor.movecount=0
+			end
+
+			if actor.shootcount%20==0 then
+				basic_shoot(actor.x, actor.y, actor.flipx)
+			end
+			actor.shootcount+=1			
+		end
+		
+		-- if the enemy is bames jond
+		-- bames' bullets will shoot directly at 
+		-- our hero, even if not striaght
+		if actor.sprite>=21 and actor.sprite <=25 then
 			actor.x+=1
-			actor.flipx=false
 		end
-		if actor.movecount>5 then
-			actor.flipx=true
-			actor.x-=1
+		
+		-- if the enemy is herlock sholmes
+		-- we want herlock to track him down
+		if actor.sprite>=26 and actor.sprite <=30 then
+			if player.x < actor.x then
+				actor.x -= 0.5 -- move towards
+				actor.flipx = true
+			else 
+				actor.x += 0.5 -- move towards
+				actor.flipx = false
+			end
+			
+			if actor.movecount < 20 and actor.movecount/5 ==0 then
+				--actor.y+=1
+				actor.movecount += 1
+				actor.sprite += 1
+			else
+				actor.sprite = 26
+				actor.movecount=0
+			end
+			
+			if actor.shootcount%20 == 0 then
+				herlock_shoot(actor.x, actor.y, player.x, player.y)
+			end
+			actor.shootcount+=1
 		end
-
-		if actor.movecount<10 then
-			actor.movecount+=1
-		else
-			actor.movecount=0
-		end
-
-		if actor.shootcount%20==0 then
-			shoot(actor.x, actor.y, actor.flipx)
-		end
-		actor.shootcount+=1
+		
 	end
 end
 
@@ -200,7 +287,7 @@ function move_player()
  	player.jump_allowed=true
   player.dy = 0
  else
- 	player.is_standing = false
+  player.is_standing = false
  	if player.jumpheight < 45 then
  		player.jump_allowed = true
  	end
@@ -257,7 +344,7 @@ function move_player()
 	end
 	
 	if btn(2) and player.jump_allowed == true then
- 	player.dy = 3
+ 	player.dy += 3
   player.jump_height +=3
   if(player.jump_height > 45) then
   	player.jump_allowed = false
@@ -268,14 +355,14 @@ function move_player()
    player.jump_height = 0
 		end
  end
+ 
+ if (not player.is_standing) then
+  player.dy -= player.gravity
+ end
+  player.dy *= player.gravity
 
  -- make dy negative because positive dy moves character downward
  player.y += (-1 * player.dy)
-
- --if (not player.is_standing) then
- -- player.dy -= player.gravity
- --end
- -- player.dy *= player.gravity
 
  if btnp(3) then
  	local tile_character_on = mget(player.x / 8, player.y / 8)

@@ -184,7 +184,7 @@ function move_player()
 	local allowance=28
 	local speed=1
 
-	check_collide_below()
+	--check_collide_below()
 
 	local tile_below_character = mget(player.x / 8, (player.y + 8) / 8)
  local tile_below_character_collidable = fget(tile_below_character, 0)

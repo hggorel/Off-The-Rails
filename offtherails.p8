@@ -178,7 +178,10 @@ function moving_soldier()
 	end
 end
 
+
+--modes should be applied around this
 function move_player()
+if mode == 1 then
 
 	local allowance=28
 	local speed=1
@@ -294,7 +297,7 @@ function move_player()
 	if player.movecount<3 then
 		player.movecount+=1
 	end
-	
+end --should end if statement?	
 end
 
 function _update()
@@ -306,6 +309,7 @@ function _update()
 		pauseupdate()
 	end
 	
+	if mode == 1 then
 	-- moving all of the bullets
 	for b in all(bullets) do
 		b.x+=b.dx
@@ -380,6 +384,7 @@ function _update()
 	 player.jump_allowed=true
 		player.jump_height=0
 	end
+	end --should end game updates
 end
 
 --changing modes
@@ -563,7 +568,7 @@ function titledraw()
 	rect(0, 0, 127, 127)
 		print("press x to start",3,3,7)
 		spr(107,45,45,4,2)
-		print("press z for settings",3,13,7)
+		print("press z for instructions",3,13,7)
 	--fix this part
 	if btn(🅾️) then
 		settings = true
@@ -637,9 +642,14 @@ end
 --settings
 function setting()
 	cls()
-	print("press ⬆️ for colorblind settings",5,20,7)
+	print("press ⬆️ for colorblind settings",0,20,7)
 	--pass some value to gamedraw
-
+	--this will be implemented later
+	print("in game instructions:",15,30,7)
+	print("use arrow keys to move",10,40,7)
+	print("press z to shoot", 20,50,7)
+	print("press ⬇️ to interact",17,60,7)
+	print("press x for inventory", 15,70,7)
 end
 --for color blind people
 function colorflip()

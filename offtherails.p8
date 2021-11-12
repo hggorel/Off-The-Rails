@@ -43,7 +43,7 @@ function _init()
 		dy=0.0,
 		dx=0.0,
 		gravity=0.3
-	}	
+	}
 
 	--actors (enemies) table
 	--[[
@@ -74,19 +74,19 @@ function _init()
 		flipx = false,
 		movecount = 0 --movecount format added to match hannah
 	}
-	
+
 	camx=0
 
 	danger = {}
 	bullets = {}
 	create_soldier(32, 64)
 	create_soldier(160, 64)
-	
+
 	map_x=0
 	map_speed=1
 	gameover=false
 	gamewin=false
-	
+
 	lives={}
 	heart1 = {
 		x=1,
@@ -132,11 +132,11 @@ function shoot(startx, starty, flipx)
 		dx=1,
 		dy=0
 	}
-	
+
 	if flipx then
 		bullet.dx = -1
 	end
-	
+
 	add(danger, bullet)
 end
 
@@ -164,13 +164,13 @@ function moving_soldier()
 			actor.flipx=true
 			actor.x-=1
 		end
-		
+
 		if actor.movecount<10 then
 			actor.movecount+=1
 		else
 			actor.movecount=0
 		end
-		
+
 		if actor.shootcount%20==0 then
 			shoot(actor.x, actor.y, actor.flipx)
 		end
@@ -178,17 +178,40 @@ function moving_soldier()
 	end
 end
 
+function check_jump_height(x, y)
+
+ -- i starts at 8 because you want to start checking
+	-- for collision one 8x8 block below the character.
+	-- 8 < 24 will check two blocks below the character
+ for i=8, 24, 1 do
+  for j=0, 8, 1 do
+			local tile = mget((player.x + j) / 8, (player.y + i) / 8)
+
+			if (fget(tile, 0)) then
+				return (i - 8)
+			end
+		end
+	end
+ -- -1 indicates that height can not be detected because
+	-- height only detects two blocks below,
+	-- so we must be higher than two blocks
+	return 16
+
+end
+
+
 function move_player()
 
 	local allowance=28
 	local speed=1
-	
+
 	local tile_below_character = mget(player.x / 8, (player.y + 8) / 8)
  local tile_below_character_collidable = fget(tile_below_character, 0)
-	
+	jump_height = check_jump_height()
+
 	local tile_right_character = mget((player.x +8)/8, player.y/8)
 	local tile_right_collidable = fget(tile_right_character, 0)
-	
+
 	local tile_left_character = mget((player.x)/8, player.y/8)
 	local tile_left_collidable = fget(tile_left_character, 0)
 
@@ -197,15 +220,19 @@ function move_player()
   player.dy = 0
  else
  	player.is_standing = false
- 	player.dy-=player.gravity
+		if(player.dy <= -3.0) then
+		 player.dy = -3.0
+	 else
+ 	 player.dy-=player.gravity
+	 end
  end
- 
+
  if (tile_right_collidable) then
 		player.is_blocked_right = true
 	else
 		player.is_blocked_right = false
 	end
-	
+
 	if (tile_left_collidable) then
 		player.is_blocked_left = true
 	else
@@ -222,7 +249,7 @@ function move_player()
 			player.x-=1
 		end
 		player.sprite=1+player.movecount
-		
+
 		if(player.x-camx<(64-allowance)) then
 			if camx<=0 then
 				camx=0
@@ -230,7 +257,7 @@ function move_player()
 				camx-=speed
 			end
 		end
-		
+
 	end
 	if btn(1) and not(player.is_blocked_right) then
 		player.flipx=true
@@ -258,14 +285,21 @@ function move_player()
 	--	end
  --end
 
+	-- if we are falling faster than the jump_height,
+	-- then set dy to be the jump_height
+	-- so we are sucked onto the ground.  
+	if(player.dy < 0 and (player.dy + jump_height) < 0) then
+		player.dy = (-1 * jump_height)
+	end
  -- make dy negative because positive dy moves character downward
  player.y += (-1 * player.dy)
+--end
 
  --if (not player.is_standing) then
  -- player.dy -= player.gravity
  --end
  -- player.dy *= player.gravity
- 
+
  if btnp(3) then
  	local tile_character_on = mget(player.x / 8, player.y / 8)
  	if tile_character_on == 60 then
@@ -276,11 +310,11 @@ function move_player()
  		gamewin=true
  	end
  end
- 
+
 	if btnp(4) and mode == 1 then
 		fire()
 	end
-	
+
 	--we dont use 5 yet i think?
 	--so this is for title to game
 --	if btnp(5) and mode == 0 then
@@ -294,7 +328,7 @@ function move_player()
 	if player.movecount<3 then
 		player.movecount+=1
 	end
-	
+
 end
 
 function _update()
@@ -305,7 +339,7 @@ function _update()
 	else
 		pauseupdate()
 	end
-	
+
 	-- moving all of the bullets
 	for b in all(bullets) do
 		b.x+=b.dx
@@ -314,7 +348,7 @@ function _update()
 			del(bullets, b)
 		end
 	end
-	
+
 	for b in all(danger) do
 		b.x+=b.dx
 		b.y+=b.dy
@@ -322,11 +356,11 @@ function _update()
 			del(danger, b)
 		end
 	end
-	
+
 	if camx>=130 then
 		camx=130
 	end
-	
+
 	move_player()
 
 	moving_soldier()
@@ -340,7 +374,7 @@ function _update()
 			end
 		end
 	end
-	
+
 	for b in all(danger) do
 		if abs(b.x - player.x)<=1 and abs(b.y - player.y)<=5 then
 			if b.dx>0 then
@@ -352,7 +386,7 @@ function _update()
 			del(danger, b)
 		end
 	end
-	
+
 	if player.health<=0 then
 		player.health=50
 		player.lives-=1
@@ -367,7 +401,7 @@ function _update()
 			gameover=true
 		end
 		--ask elise to make a sprite to show defeat??
-		--^ this will be sprite 10 :) 
+		--^ this will be sprite 10 :)
 	end
 
 	--gravity
@@ -375,7 +409,7 @@ function _update()
 		player.y+=1
 		player.ydiff-=1
 	end
-	
+
 	if player.ydiff==0 then
 	 player.jump_allowed=true
 		player.jump_height=0
@@ -422,7 +456,7 @@ end
 	sprite=69,
 	a=.25
 	}
-	
+
 title={ --info for the title sprite
 sp=0,
 w=8,
@@ -469,6 +503,9 @@ function _draw()
 	else
 		pausedraw() --mode only if 1
 	end
+
+	print(jump_height, 100, 100)
+	print(player.dy, 100, 110)
 end
 
 function gamedraw()
@@ -486,7 +523,7 @@ function gamedraw()
 		if player.lives>0 then
 			spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
 		end
-	
+
 		for e in all(enemies) do
 			spr(e.sprite, e.x, e.y, 1, 1, e.flipx, false)
 		end
@@ -497,7 +534,7 @@ function gamedraw()
 			spr(b.sprite, b.x, b.y)
 		end
 
-		camera()	
+		camera()
 		print('health', 1, 1, 6)
 		rectfill(1,8, player.health,9,8)
 		print('lives', 1, 13, 6)
@@ -505,12 +542,12 @@ function gamedraw()
 			spr(h.sprite, h.x, h.y)
 		end
 	end
-	
+
 	if level == 1 then
 		--level 2 function call
-	
+
 	end
-	
+
 	if gameover then
 		-- draw new game over screen
 		cls(1)
@@ -520,7 +557,7 @@ function gamedraw()
 		print('your village gets nothing', 13)
 		spr(77,112,112,2,2) --prints execution sprite
 	end
-	
+
 	if gamewin then
 		-- draw won level screen
 		cls(2)
@@ -528,7 +565,7 @@ function gamedraw()
 		print('next levels are', 13)
 		print('under construction', 13)
 	end
-	
+
 end
 
 function _drawmapsprites()
@@ -812,4 +849,3 @@ __sfx__
 __music__
 00 41424344
 03 01020344
-

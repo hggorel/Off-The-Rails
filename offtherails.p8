@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 32
+version 33
 __lua__
 --basic set up sections
 --in the game
@@ -35,14 +35,13 @@ function _init()
 		y = 64,
 		flipx=false,
 		ydiff=0,
-		jump_height=0,
-		jump_allowed=true,
 		is_standing = true,
 		is_blocked_right = false,
 		is_blocked_left = false,
+		is_blocked_above = false,
 		dy=0.0,
 		dx=0.0,
-		gravity=0.5
+		gravity=0.3
 	}
 
 	--actors (enemies) table
@@ -81,12 +80,12 @@ function _init()
 	bullets = {}
 	create_soldier(32, 64)
 	create_soldier(160, 64)
-	create_herlock(45, 64)
+	create_herlock(80, 64)
 
 	map_x=0
 	map_speed=1
 	gameover=false
-	gamewin=false
+	levelwin=false
 
 	lives={}
 	heart1 = {
@@ -206,6 +205,18 @@ end
 
 function moving_soldier()
 	for actor in all(enemies) do
+		local tile_below = mget(actor.x / 8, (actor.y + 8) / 8)
+ 	local tile_below_collidable = fget(tile_below, 0)
+
+		local tile_above = mget((actor.x+4) / 8, (actor.y-1) / 8)
+ 	local tile_above_collidable = fget(tile_above, 0)
+
+		local tile_right = mget((actor.x +8)/8, actor.y/8)
+		local tile_right_collidable = fget(tile_right, 0)
+
+		local tile_left = mget((actor.x)/8, actor.y/8)
+		local tile_left_collidable = fget(tile_left, 0)
+
 		-- if the enemy is a soldier
 		if actor.sprite <=20 and actor.sprite >=16 then
 			if actor.movecount<5 then
@@ -240,11 +251,19 @@ function moving_soldier()
 		-- we want herlock to track him down
 		if actor.sprite>=26 and actor.sprite <=30 then
 			if player.x < actor.x then
-				actor.x -= 0.5 -- move towards
-				actor.flipx = true
+				 if not(tile_left_collidable) then
+						actor.x -= 0.5 -- move towards
+						actor.flipx = true
+					end
 			else
-				actor.x += 0.5 -- move towards
-				actor.flipx = false
+				if not(tile_right_collidable) then
+					actor.x += 0.5 -- move towards
+					actor.flipx = false
+				end
+			end
+			
+			if not(tile_below_collidable) then
+				actor.y += player.gravity
 			end
 
 			if actor.movecount < 20 and actor.movecount/5 ==0 then
@@ -265,16 +284,35 @@ function moving_soldier()
 	end
 end
 
+function check_jump_height(x, y)
+	-- i starts at 8 because you want to start checking
+	-- for collision one 8x8 block below the character.
+	-- 8 < 24 will check two blocks below the character
+ for i=8, 24, 1 do
+ 	for j=0, 8, 1 do
+ 		local tile = mget((player.x+j)/8, (player.y+i)/8)
+ 		if (fget(tile, 0)) then
+ 			return (i-8)
+ 		end
+ 	end
+ end
+	-- -1 indicates that height can not be detected because
+	-- height only detects two blocks below
+	-- so we must be higher than two blocks
+	return 16
+end
+ 		
 function move_player()
 
 	local allowance=28
 	local speed=1
+	jump_height = check_jump_height()
 
 	local tile_below_character = mget(player.x / 8, (player.y + 8) / 8)
  local tile_below_character_collidable = fget(tile_below_character, 0)
 
-	local tile_above = mget(player.x / 8, (player.y) / 8)
- local tile_above_character_collidable = fget(tile_above, 0)
+	local tile_above = mget((player.x+4) / 8, (player.y-1) / 8)
+ local tile_above_collidable = fget(tile_above, 0)
 
 	local tile_right_character = mget((player.x +8)/8, player.y/8)
 	local tile_right_collidable = fget(tile_right_character, 0)
@@ -284,21 +322,25 @@ function move_player()
 
  if (tile_below_character_collidable) then
  	player.is_standing = true
- 	player.jumpheight=0
- 	player.jump_allowed=true
   player.dy = 0
  else
   player.is_standing = false
- 	if player.jumpheight < 45 then
- 		player.jump_allowed = true
+ 	if (player.dy <= -3.0) then
+ 		player.dy = -3.0
+ 	else
+ 		player.dy-=player.gravity
  	end
- 	player.dy-=player.gravity
  end
 
  if (tile_above_collidable) then
- 	player.jump_allowed=false
- 	player.is_standing=false
- 	player.dy=(-1*player.gravity)
+ 	player.is_blocked_above = true
+ 	if player.is_standing then
+ 		player.dy=0
+ 	else
+ 		player.dy=-player.gravity
+ 	end
+ else
+ 	player.is_blocked_above = false
  end
 
  if (tile_right_collidable) then
@@ -311,6 +353,11 @@ function move_player()
 		player.is_blocked_left = true
 	else
 		player.is_blocked_left = false
+	end
+	
+	if btnp(2) and player.is_standing and not(player.is_blocked_above) then
+		player.dy = 3
+		player.is_standing = false
 	end
 
  -- moving player based on input
@@ -344,23 +391,27 @@ function move_player()
 		end
 	end
 
-	if btn(2) and player.jump_allowed == true then
- 	player.dy += 3
-  player.jump_height +=3
-  if(player.jump_height > 45) then
-  	player.jump_allowed = false
-  	player.dy = (-1 *player.gravity)
-  end
-  if(player.is_standing and player.jump_allowed == false) then
-   player.jump_allowed = true
-   player.jump_height = 0
-		end
- end
+	--if btn(2) and player.jump_allowed == true then
+ --	player.dy += 3
+ -- player.jump_height +=3
+ -- if(player.jump_height > 45) then
+ -- 	player.jump_allowed = false
+ -- 	player.dy = (-1 *player.gravity)
+ -- end
+ -- if(player.is_standing and player.jump_allowed == false) then
+ --  player.jump_allowed = true
+ --  player.jump_height = 0
+	--	end
+ --end
 
- if (not player.is_standing) then
-  player.dy -= player.gravity
- end
-  player.dy *= player.gravity
+ --if (not player.is_standing) then
+ -- player.dy -= player.gravity
+ --end
+ -- player.dy *= player.gravity
+	
+	if(player.dy < 0 and (player.dy + jump_height)<0) then
+		player.dy = (-1 * jump_height)
+	end
 
  -- make dy negative because positive dy moves character downward
  player.y += (-1 * player.dy)
@@ -372,7 +423,7 @@ function move_player()
  		mset(player.x/8, (player.y-8)/8, 45)
  	end
  	if tile_character_on ==61 then
- 		gamewin=true
+ 		levelwin=true
  	end
  	if tile_character_on ==57 then
  		mset(player.x/8, player.y/8, 58)
@@ -413,20 +464,73 @@ function _update()
 
 	--gameplay mode updates
 	if mode == 1 then
+	
+	local player_right_character = mget((player.x +8)/8, player.y/8)
+	local player_right_collidable = fget(player_right_character, 0)
+
+	local player_left_character = mget((player.x)/8, player.y/8)
+	local player_left_collidable = fget(player_left_character, 0)
+
 	-- moving all of the bullets
 	for b in all(bullets) do
+		local tile_below = mget(b.x / 8, (b.y + 8) / 8)
+ 	local tile_below_collidable = fget(tile_below, 0)
+
+		local tile_above = mget((b.x+4) / 8, (b.y-1) / 8)
+ 	local tile_above_collidable = fget(tile_above, 0)
+
+		local tile_right = mget((b.x +8)/8, b.y/8)
+		local tile_right_collidable = fget(tile_right, 0)
+
+		local tile_left = mget((b.x)/8, b.y/8)
+		local tile_left_collidable = fget(tile_left, 0)
+		
 		b.x+=b.dx
 		b.y+=b.dy
+		
+		if b.dx < 0 and tile_left_collidable then
+			del(bullets, b)
+		elseif b.dx > 0 and tile_right_collidable then
+			del(bullets, b)
+		elseif b.dy < 0 and tile_above_collidable then
+			del(bullets, b)
+		elseif b.dy > 0 and tile_below_collidable then
+			del(bullets, b)
+		end
+		
 		if b.x<camx-128 or b.x > camx+128 or b.y < 0 or b.y>128 then
 			del(bullets, b)
 		end
 	end
 
-	for b in all(danger) do
-		b.x+=b.dx
-		b.y+=b.dy
-		if b.x<camx-128 or b.x>camx+128 or b.y<0 or b.y>128 then
-			del(danger, b)
+	for e in all(danger) do
+		local tile_below = mget(e.x / 8, (e.y + 8) / 8)
+ 	local tile_below_collidable = fget(tile_below, 0)
+
+		local tile_above = mget((e.x+4) / 8, (e.y-1) / 8)
+ 	local tile_above_collidable = fget(tile_above, 0)
+
+		local tile_right = mget((e.x +8)/8, e.y/8)
+		local tile_right_collidable = fget(tile_right, 0)
+
+		local tile_left = mget((e.x)/8, e.y/8)
+		local tile_left_collidable = fget(tile_left, 0)
+		
+		e.x+=e.dx
+		e.y+=e.dy
+		
+		if e.dx < 0 and tile_left_collidable then
+			del(danger, e)
+		elseif e.dx > 0 and tile_right_collidable then
+			del(danger, e)
+		elseif e.dy < 0 and tile_above_collidable then
+			del(danger, e)
+		elseif e.dy > 0 and tile_below_collidable then
+			del(danger, e)
+		end
+		
+		if e.x<camx-128 or e.x>camx+128 or e.y<0 or e.y>128 then
+			del(danger, e)
 		end
 	end
 
@@ -450,9 +554,10 @@ function _update()
 
 	for b in all(danger) do
 		if abs(b.x - player.x)<=1 and abs(b.y - player.y)<=5 then
-			if b.dx>0 then
+			if b.dx>0 and not(player_right_collidable) then
 				player.x+=1
-			else
+			end
+			if b.dx < 0 and not(player_left_collidable) and player.x>0 then
 				player.x-=1
 			end
 			player.health-=5
@@ -572,15 +677,16 @@ function _draw()
 	else
 		pausedraw()
 	end
+	
 end
 
 function gamedraw()
-	if gameover==false and gameover==false then
+	if levelwin==false and gameover==false then
  	cls(5)
  	camera(camx, -16)
  	--camera(0, -16)
  	--multiple in editor values by 8 to match map values
-	drawclouds() --cloud animation 9*8
+		drawclouds() --cloud animation 9*8
  	--map(0,0,map_x,0,32*8,9*8)
  	--map(16,0,map_x+128, 0, 32*8, 9*8)
  	map(0, 0, 0, 0, 32*8, 9*8)
@@ -620,13 +726,10 @@ function gamedraw()
 		spr(77,112,112,2,2) --prints execution sprite
 	end
 
-	if gamewin then
-		-- draw won level screen
-		cls(2)
-		print('level completed!', 7)
-		print('next levels are', 13)
-		print('under construction', 13)
+	if levelwin then
+		
 	end
+	
 end
 
 function _drawmapsprites()
@@ -643,7 +746,7 @@ function _drawmapsprites()
 		spr(42,16*8,08*8) --table 2
 		spr(42,20*8,08*8) --table 3
 
-	end
+end
 
 function titledraw()
 	cls()
@@ -726,6 +829,29 @@ end
 --for map 2 must use palette to swap
 --so that gray in background doesnt belnd in w gun
 function level2draw()
+	cls(5)
+ camera(camx, -16)
+ map(33, 0, 0, 1, 32*8, 9*8)
+	if player.lives>0 then
+		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
+	end
+	for e in all(enemies) do
+		spr(e.sprite, e.x, e.y, 1, 1, e.flipx, false)
+	end
+	for b in all(bullets) do
+		spr(b.sprite, b.x, b.y)
+	end
+	for b in all(danger) do
+		spr(b.sprite, b.x, b.y)
+	end
+	_drawmapsprites()
+	camera()
+	print('health', 1, 1, 6)
+	rectfill(1,8, player.health,9,8)
+	print('lives', 1, 13, 6)
+	for h in all(lives) do
+		spr(h.sprite, h.x, h.y)
+	end
 
 end
 
@@ -834,14 +960,14 @@ a9aaaa9a36000000000000638a8888888880082888882888882800333bb333b33333300002222222
 a999999a36000000000000632282882200811822888222888228003333333333bbb3300002222222000440004344443449999994400009943600006300000000
 aaaaaaaa360000000000006388112288811008811888888118881133113333333113311005444445000440004433334449555594400009943600006300000000
 99999999336666666666663300110000011000011000000110000000110000000110000005500055005555004444444449555594400009943600006300000000
-0000000033333333333333330000000000000000cccccccc00000000000000000000000033333333333333330000000049999994400009943600006300000000
-000aa000b3b3b3b3333333330000000007700770cccccccc000d0000000000000000000033333333333333330000000045999994400005943600006300000000
-00a00a003b3b3b3b333333330000000077770000cccccccc00ddd000000000000000000033333333333333330000000045999994400005943600006300000000
-4544445433333333333333330000000000000000cccccccc0ddddd00000000000000000033333333333333330000000049999994400009943600006300000000
-4544445433333333333333330077700000000000ccccccccddddddd00dddd0000066000033999933333333330000000049999994400009943600006300000000
-4544445433333333333333330777777000000700ccccccccddddddddddddddd00000000033888833339999330000000049999994400009943600006300000000
-45444454bbbbbbbb333333337777777700077770ccccccccdddddddddddddddd00000000b444444bb444444b0000000049999994400009943600006300000000
-4544445433333333333333330000000000000000ccccccccdddddddddddddddd0000000044444444444444440000000049999994400000943666666300000000
+0000000033333333333333330000000000000000cccccccc00000000000000000000000033333333333333333444444349999994400009943600006300000000
+000aa000b3b3b3b3333333330000000007700770cccccccc000d0000000000000000000033333333333333333444444345999994400005943600006300000000
+00a00a003b3b3b3b333333330000000077770000cccccccc00ddd000000000000000000033333333333333333444444345999994400005943600006300000000
+4544445433333333333333330000000000000000cccccccc0ddddd00000000000000000033333333333333333666666349999994400009943600006300000000
+4544445433333333333333330077700000000000ccccccccddddddd00dddd0000066000033999933333333333666666349999994400009943600006300000000
+4544445433333333333333330777777000000700ccccccccddddddddddddddd00000000033888833339999333444444349999994400009943600006300000000
+45444454bbbbbbbb333333337777777700077770ccccccccdddddddddddddddd00000000b444444bb444444b3444444349999994400009943600006300000000
+4544445433333333333333330000000000000000ccccccccdddddddddddddddd0000000044444444444444443444444349999994400000943666666300000000
 000ccc0000000000001111100001111000000000000000000c0000000000000000000000000000000ca0000000c0000000000000000000000000000000000000
 00c66f0000cccc0001444110001111100660660007000000000000006070000067000000670000000cca7000000a000000000000000088888000000000000000
 00c6fff000c6fff001343111000c4cd0666666600000000000d7c00000c60000066000000660000000ca0000000c000000000000000088fff800000000000000
@@ -908,16 +1034,16 @@ dddddd000dddddd000505000000d0d00000000000000000000000000000000000000000000000000
 00000000000000007999999770000097000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __gff__
 0000000000000000000000000000000000000000000000000000000000000000010000000000000000000000020200000200000000000000000000010202000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 2b3232322b32322b3232322b32322b3232322b32322b3232322b2b323232322b000000009584848493858686879384848485868784848493848484849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 323232323232323232323232323232323232323232323232323232323232322b000000009584848493979797979384848484848484848493848484849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 323232322e32322e3232322e32322e3232322e32322e3232322e2e32322e322b000000009584828493848484849384858784848485878493848484849384828495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 323232323e31313e3131313e31313e3131313e31313e3131313e3e31393e312b00000000958484849384848484938484848484848484849384a2a2849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-323220202020202020202020202020202020202020202020202020202020202b00000000959292928384848484839292929292929292929284b2b2849292929295000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-323232322b32322b3232322b32322b3232322b32322b3220322b2b3232322b2b000000009584848493848484849384848484848484848483929292928384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-203232323232323232323232323232323232323232323220323232323232322b000000009584848493848484849384848484848484848493848484849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-21223221223232212232212232322122322122323221223b322122323221222b000000009585868793858686879384858784848485878493848484849385868795000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+323232322020202020202020202020202020202020202020202020202020202b00000000959292928384848484839292929292929292929284b2b2849292929295000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+323220322b32322b3232322b32322b3232322b32322b3220322b2b3232322b2b000000009584848493848484849384848484848484848483929292928384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+323232323232323232323232323232323232323232323220323232323232322b000000009584848493848484849384848484848484848493848484849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+20223221223232212232212232322122322122323221223b322122323221222b000000009585868793858686879384858784848485878493848484849385868795000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 31313131313131313131313131313131313131313131313b322c2c323131312b00000000958488849384848484938484848484848484849384a2a2849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 202020202020202020202020202020202020202020202020313c3c312020202000000000969494949484848484949494949494949494949484b2b2849494949696000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000002020202020200000000000000000000000969494949496a1000000000000000096949494949600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

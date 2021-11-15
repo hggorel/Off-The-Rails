@@ -34,15 +34,14 @@ function _init()
 		x = 32,
 		y = 64,
 		flipx=false,
-		ydiff=0,
-		--jump_height=0,
-		--jump_allowed=true
 		is_standing = true,
-		is_blocked_right = false,
-		is_blocked_left = false,
+		jump_force = 3,
 		dy=0.0,
 		dx=0.0,
-		gravity=0.3
+		dy_max = 3,
+		dx_max = 1.5,
+		gravity=0.3,
+		friction=0.6
 	}
 
 	--actors (enemies) table
@@ -192,9 +191,7 @@ function check_jump_height(x, y)
 			end
 		end
 	end
- -- -1 indicates that height can not be detected because
-	-- height only detects two blocks below,
-	-- so we must be higher than two blocks
+ -- 16 indicates that we are at least two blocks away
 	return 16
 
 end
@@ -202,132 +199,239 @@ end
 
 function move_player()
 
-	local allowance=28
-	local speed=1
-
-	local tile_below_character = mget(player.x / 8, (player.y + 8) / 8)
- local tile_below_character_collidable = fget(tile_below_character, 0)
+	-- how high we are from next nearest block
 	jump_height = check_jump_height()
 
-	local tile_right_character = mget((player.x +8)/8, player.y/8)
-	local tile_right_collidable = fget(tile_right_character, 0)
+	if (jump_height == 0) player.is_standing = true
+	if (jump_height > 0) player.is_standing = false
 
-	local tile_left_character = mget((player.x)/8, player.y/8)
-	local tile_left_collidable = fget(tile_left_character, 0)
-
- if (tile_below_character_collidable) then
- 	player.is_standing = true
-  player.dy = 0
- else
- 	player.is_standing = false
-		if(player.dy <= -3.0) then
-		 player.dy = -3.0
-	 else
- 	 player.dy-=player.gravity
-	 end
- end
-
- if (tile_right_collidable) then
-		player.is_blocked_right = true
-	else
-		player.is_blocked_right = false
+	-- applies gravity every frame
+	if not player.is_standing then
+		player.dy -= player.gravity
+		if (player.dy < -3) player.dy = -3
 	end
 
-	if (tile_left_collidable) then
-		player.is_blocked_left = true
-	else
-		player.is_blocked_left = false
-	end
- if btnp(2) and player.is_standing then
-  player.dy = 3
-  player.is_standing = false
- end
- -- moving player based on input
-	if btn(0) and not(player.is_blocked_left) then
-		player.flipx=false
-		if player.x>0 then
-			player.x-=1
-		end
-		player.sprite=1+player.movecount
-
-		if(player.x-camx<(64-allowance)) then
-			if camx<=0 then
-				camx=0
-			else
-				camx-=speed
-			end
-		end
-
-	end
-	if btn(1) and not(player.is_blocked_right) then
-		player.flipx=true
-		if player.x<240 then
-			player.x+=1
-		end
-		player.sprite =1+player.movecount
-		--map_x-=map_speed
-		if (player.x-camx>(64+allowance)) then
-			if camx<=120 then
-				camx+=speed
-			end
-		end
-	end
-	--if btn(2) and player.jump_allowed == true then
- --	player.y-=3
- -- player.ydiff+=3
- -- player.jump_height +=3
- -- if(player.jump_height > 70) then
- -- 	player.jump_allowed = false
- -- end
- -- if(player.ydiff == 0 and player.jump_allowed == false) then
- --  player.jump_allowed = true
- --  player.jump_height = 0
-	--	end
- --end
-
-	-- if we are falling faster than the jump_height,
-	-- then set dy to be the jump_height
-	-- so we are sucked onto the ground.  
-	if(player.dy < 0 and (player.dy + jump_height) < 0) then
+	-- if we are falling past the floor,
+	-- fix it by changing dy to the height from the floor
+	-- so we get sucked to the ground instead
+	if (player.dy < 0) and (player.dy + jump_height < 0) then
+		player.is_standing = true
 		player.dy = (-1 * jump_height)
 	end
- -- make dy negative because positive dy moves character downward
+
+	-- when the player lets go, and we are moving up
+	-- then we fraction vertical velocity to start falling sooner
+	if (not btn(2) and not player.is_standing and player.dy > 0) player.dy *= 0.5
+
+ -- jump is pressed, jump up
+	if btnp(2) and player.is_standing then
+		player.dy += player.jump_force
+		player.is_standing = false
+	end
+
+	-- if not btn(2) and not player.is_standing and (player.dy > 0) then
+	-- 		player.dy *= 0.6
+	-- 		player.dy -= player.gravity
+	-- end
+
+	-- make dy negative because positive dy moves character downward
  player.y += (-1 * player.dy)
+
+	-- if we are falling past the floor,
+	-- fix it by changing dy to the height from the floor
+	-- so we get sucked to the ground instead
+	-- if (player.dy < 0) and (player.dy + jump_height < 0) then
+	-- 	player.is_standing = true
+	-- 	player.dy = (-1 * jump_height)
+	-- end
+	--
+	-- if(player.dy < (-1 * player.dy_max)) then
+	--  player.dy = (-1 * player.dy_max)
+	-- else
+	-- 	player.dy -= player.gravity
+	-- end
+
+		-- if we are falling faster than the jump_height,
+		-- then set dy to be the jump_height
+		-- so we are sucked onto the ground.
+		-- local y_difference = player.dy + jump_height
+		-- if(player.dy < 0 and y_difference < 0) then
+		-- 	player.dy = (-1 * jump_height)
+		-- end
+	 -- make dy negative because positive dy moves character downward
+	 --player.y += (-1 * player.dy)
+	--end
+
+ -- when jump is not being held anymore
+	-- and we are heading upwards, start moving down
+	-- if not btn(2) and not player.is_standing then
+	-- 	if (player.dy > 0) then
+	-- 		player.dy *= 0.6
+	-- 		player.dy -= player.gravity
+	-- 	end
+	-- end
+	--
+	-- -- if we want to jump and also can
+	-- -- move upwards
+	-- if btnp(2) and player.is_standing then
+	-- 	player.dy += 3
+	-- 	player.is_standing = false
+	-- end
+
 --end
 
- --if (not player.is_standing) then
- -- player.dy -= player.gravity
- --end
- -- player.dy *= player.gravity
 
- if btnp(3) then
- 	local tile_character_on = mget(player.x / 8, player.y / 8)
- 	if tile_character_on == 60 then
- 		mset(player.x/8, player.y/8, 61)
- 		mset(player.x/8, (player.y-8)/8, 45)
- 	end
- 	if tile_character_on ==61 then
- 		gamewin=true
- 	end
- end
+	-- if not btn(2) and not player.is_standing then
+	-- 	if(player.dy > 0) then
+	-- 		player.dy *= 0.6
+	-- 		player.dy -= player.gravity
+	-- 	end
+	-- end
+	--
+ -- if btnp(2) and player.is_standing then
+ --  player.dy = 3
+ --  player.is_standing = false
+ -- end
 
-	if btnp(4) and mode == 1 then
-		fire()
-	end
+	--
+	-- local allowance=28
+	-- local speed=1
+	--
+	-- local tile_below_character = mget(player.x / 8, (player.y + 8) / 8)
+ -- local tile_below_character_collidable = fget(tile_below_character, 0)
+	-- jump_height = check_jump_height()
+	--
+	-- local tile_right_character = mget((player.x +8)/8, player.y/8)
+	-- local tile_right_collidable = fget(tile_right_character, 0)
+	--
+	-- local tile_left_character = mget((player.x)/8, player.y/8)
+	-- local tile_left_collidable = fget(tile_left_character, 0)
+	--
+ -- if (tile_below_character_collidable) then
+ -- 	player.is_standing = true
+ --  player.dy = 0
+ -- else
+ -- 	player.is_standing = false
+	-- 	-- limit gravity to -3
+	-- 	if(player.dy <= -3.0) then
+	-- 	 player.dy = -3.0
+	--  else
+	-- 		-- otherwise add gravity to the movement downwards
+ -- 	 player.dy-=player.gravity
+	--  end
+ -- end
+	--
+ -- if (tile_right_collidable) then
+	-- 	player.is_blocked_right = true
+	-- else
+	-- 	player.is_blocked_right = false
+	-- end
+	--
+	-- if (tile_left_collidable) then
+	-- 	player.is_blocked_left = true
+	-- else
+	-- 	player.is_blocked_left = false
+	-- end
+	--
+ -- if not btn(2) and not player.is_standing then
+	-- 	if(player.dy > 0) then
+	-- 		player.dy *= 0.6
+	-- 		player.dy -= player.gravity
+	-- 	end
+	-- end
+	--
+ -- if btnp(2) and player.is_standing then
+ --  player.dy = 3
+ --  player.is_standing = false
+ -- end
 
-	--we dont use 5 yet i think?
-	--so this is for title to game
---	if btnp(5) and mode == 0 then
-	--	mode = 1
---	end --redundant code
-
-	-- switching to see animation
-	if player.movecount==3 then
-		player.movecount=1
-	end
-	if player.movecount<3 then
-		player.movecount+=1
-	end
+--
+--  -- moving player based on input
+-- 	if btn(0) and not(player.is_blocked_left) then
+-- 		player.flipx=false
+-- 		if player.x>0 then
+-- 			player.x-=1
+-- 		end
+-- 		player.sprite=1+player.movecount
+--
+-- 		if(player.x-camx<(64-allowance)) then
+-- 			if camx<=0 then
+-- 				camx=0
+-- 			else
+-- 				camx-=speed
+-- 			end
+-- 		end
+--
+-- 	end
+-- 	if btn(1) and not(player.is_blocked_right) then
+-- 		player.flipx=true
+-- 		if player.x<240 then
+-- 			player.x+=1
+-- 		end
+-- 		player.sprite =1+player.movecount
+-- 		--map_x-=map_speed
+-- 		if (player.x-camx>(64+allowance)) then
+-- 			if camx<=120 then
+-- 				camx+=speed
+-- 			end
+-- 		end
+-- 	end
+-- 	--if btn(2) and player.jump_allowed == true then
+--  --	player.y-=3
+--  -- player.ydiff+=3
+--  -- player.jump_height +=3
+--  -- if(player.jump_height > 70) then
+--  -- 	player.jump_allowed = false
+--  -- end
+--  -- if(player.ydiff == 0 and player.jump_allowed == false) then
+--  --  player.jump_allowed = true
+--  --  player.jump_height = 0
+-- 	--	end
+--  --end
+--
+-- 	-- if we are falling faster than the jump_height,
+-- 	-- then set dy to be the jump_height
+-- 	-- so we are sucked onto the ground.
+-- 	if(player.dy < 0 and (player.dy + jump_height) < 0) then
+-- 		player.dy = (-1 * jump_height)
+-- 	end
+--  -- make dy negative because positive dy moves character downward
+--  player.y += (-1 * player.dy)
+-- --end
+--
+--  --if (not player.is_standing) then
+--  -- player.dy -= player.gravity
+--  --end
+--  -- player.dy *= player.gravity
+--
+--  if btnp(3) then
+--  	local tile_character_on = mget(player.x / 8, player.y / 8)
+--  	if tile_character_on == 60 then
+--  		mset(player.x/8, player.y/8, 61)
+--  		mset(player.x/8, (player.y-8)/8, 45)
+--  	end
+--  	if tile_character_on ==61 then
+--  		gamewin=true
+--  	end
+--  end
+--
+-- 	if btnp(4) and mode == 1 then
+-- 		fire()
+-- 	end
+--
+-- 	--we dont use 5 yet i think?
+-- 	--so this is for title to game
+-- --	if btnp(5) and mode == 0 then
+-- 	--	mode = 1
+-- --	end --redundant code
+--
+-- 	-- switching to see animation
+-- 	if player.movecount==3 then
+-- 		player.movecount=1
+-- 	end
+-- 	if player.movecount<3 then
+-- 		player.movecount+=1
+-- 	end
 
 end
 
@@ -404,16 +508,16 @@ function _update()
 		--^ this will be sprite 10 :)
 	end
 
-	--gravity
-	if player.ydiff > 0 then
-		player.y+=1
-		player.ydiff-=1
-	end
-
-	if player.ydiff==0 then
-	 player.jump_allowed=true
-		player.jump_height=0
-	end
+	-- --gravity
+	-- if player.ydiff > 0 then
+	-- 	player.y+=1
+	-- 	player.ydiff-=1
+	-- end
+	--
+	-- if player.ydiff==0 then
+	--  player.jump_allowed=true
+	-- 	player.jump_height=0
+	-- end
 end
 
 --changing modes
@@ -504,8 +608,8 @@ function _draw()
 		pausedraw() --mode only if 1
 	end
 
-	print(jump_height, 100, 100)
-	print(player.dy, 100, 110)
+	--print(jump_height, 100, 100)
+	-- print(player.dy, 100, 110)
 end
 
 function gamedraw()

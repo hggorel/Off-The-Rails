@@ -36,12 +36,14 @@ function _init()
 		flipx=false,
 		is_standing = true,
 		jump_force = 3,
+		run_force = 0.5,
 		dy=0.0,
 		dx=0.0,
 		dy_max = 3,
 		dx_max = 1.5,
 		gravity=0.3,
-		friction=0.6
+		air_resistance=0.8,
+		friction=0.5
 	}
 
 	--actors (enemies) table
@@ -177,13 +179,12 @@ function moving_soldier()
 	end
 end
 
-function check_jump_height(x, y)
-
+function check_jump_height()
  -- i starts at 8 because you want to start checking
 	-- for collision one 8x8 block below the character.
 	-- 8 < 24 will check two blocks below the character
- for i=8, 24, 1 do
-  for j=0, 8, 1 do
+ for i=8, 15, 1 do
+  for j=0, 7, 1 do
 			local tile = mget((player.x + j) / 8, (player.y + i) / 8)
 
 			if (fget(tile, 0)) then
@@ -196,11 +197,28 @@ function check_jump_height(x, y)
 
 end
 
+function check_ceiling_height()
+ -- i starts at 0 because you want to start checking
+	-- for collision one 8x8 block above the character.
+	-- 8 < 24 will check two blocks above the character
+ for i=1, 15, 1 do
+  for j=0, 7, 1 do
+			local tile = mget((player.x + j) / 8, (player.y - i) / 8)
 
-function move_player()
+			if (fget(tile, 0)) then
+				return (i - 1)
+			end
+		end
+	end
+ -- 16 indicates that we are at least two blocks away
+	return 16
 
-	-- how high we are from next nearest block
-	jump_height = check_jump_height()
+end
+
+function calculate_y_movement()
+
+	local ceiling_height = check_ceiling_height()
+	local jump_height = check_jump_height()
 
 	if (jump_height == 0) player.is_standing = true
 	if (jump_height > 0) player.is_standing = false
@@ -219,6 +237,10 @@ function move_player()
 		player.dy = (-1 * jump_height)
 	end
 
+	if(player.dy > 0) and (player.dy - ceiling_height > 0) then
+		player.dy = (-1 * ceiling_height)
+	end
+
 	-- when the player lets go, and we are moving up
 	-- then we fraction vertical velocity to start falling sooner
 	if (not btn(2) and not player.is_standing and player.dy > 0) player.dy *= 0.5
@@ -229,13 +251,95 @@ function move_player()
 		player.is_standing = false
 	end
 
-	-- if not btn(2) and not player.is_standing and (player.dy > 0) then
-	-- 		player.dy *= 0.6
-	-- 		player.dy -= player.gravity
-	-- end
-
 	-- make dy negative because positive dy moves character downward
- player.y += (-1 * player.dy)
+ return (-1 * player.dy)
+end
+
+function check_collide_left()
+
+	for i=1, 8, 1 do
+		for j=0, 7, 1 do
+			local tile = mget((player.x - i) / 8, (player.y + j) / 8)
+
+			if (fget(tile, 0)) return (i - 1)
+		end
+	end
+ -- 9 indicates we are at least 1 block away
+	return 9
+
+end
+
+function check_collide_right()
+
+ for i=0, 7, 1 do
+  for j=8, 15, 1 do
+			local tile = mget((player.x + j) / 8, (player.y + i) / 8)
+
+			if (fget(tile, 0)) return (j - 8)
+		end
+	end
+ -- 9 indicates we are at least 1 block away
+	return 9
+
+end
+
+function calculate_x_movement()
+
+	local collide_distance_right = check_collide_right()
+	local collide_distance_left = check_collide_left()
+
+	-- if we arent moving left or right,
+	-- slow down the player if they are in the air
+	if(not btn(1) and not btn(0) and not player.is_standing) then
+	 player.dx *= player.air_resistance
+	end
+	-- if we are standing instead of in the air, friction is greater
+ if(not btn(1) and not btn(0) and player.is_standing) then
+		player.dx *= player.friction
+	end
+
+	-- move right, increases until we reach max speed
+	if btn(1) then
+		player.flipx = true
+		player.dx += player.run_force
+		if (player.dx > player.dx_max) player.dx = player.dx_max
+	end
+
+	-- move left, decreases until we reach minimum speed
+	-- (-1 * player.dx_max is just the negative direction maximum)
+	if btn(0) then
+		player.flipx = false
+		player.dx -= player.run_force
+		if (player.dx < (-1 * player.dx_max)) player.dx = (-1 * player.dx_max)
+	end
+
+	if (player.dx > 0) then
+		-- snaps movement right to the wall
+		-- keep collide_distance_right positive because we are moving right
+		if(player.dx - collide_distance_right > 0) player.dx = collide_distance_right
+	end
+
+	temp_dx = player.dx
+
+	if (btn(0) and player.dx < 0) then
+		-- snaps movement left to the wall
+		-- make collide_distance_left negative cause we are moving left
+		if (player.dx + collide_distance_left < 0) then
+			player.dx = (-1 * collide_distance_left)
+		end
+ end
+
+	return player.dx
+
+end
+
+function move_player()
+
+	player.x += calculate_x_movement()
+	player.y += calculate_y_movement()
+
+	--if ((player.x % 0.5) > 0.5) then ceil(player.x) else flr(player.x) end
+	-- if ((player.y % 0.5) > 0.5) then ceil(player.y) else flr(player.y) end
 
 	-- if we are falling past the floor,
 	-- fix it by changing dy to the height from the floor
@@ -294,8 +398,8 @@ function move_player()
  -- end
 
 	--
-	-- local allowance=28
-	-- local speed=1
+	local allowance=28
+	local speed=player.dx
 	--
 	-- local tile_below_character = mget(player.x / 8, (player.y + 8) / 8)
  -- local tile_below_character_collidable = fget(tile_below_character, 0)
@@ -354,27 +458,27 @@ function move_player()
 -- 		end
 -- 		player.sprite=1+player.movecount
 --
--- 		if(player.x-camx<(64-allowance)) then
--- 			if camx<=0 then
--- 				camx=0
--- 			else
--- 				camx-=speed
--- 			end
--- 		end
---
--- 	end
+		if(player.x-camx<(64-allowance)) then
+			if camx<=0 then
+				camx=0
+			else
+				camx-=speed
+			end
+		end
+-- --
+-- -- 	end
 -- 	if btn(1) and not(player.is_blocked_right) then
 -- 		player.flipx=true
--- 		if player.x<240 then
--- 			player.x+=1
--- 		end
+-- 		-- if player.x<240 then
+-- 		-- 	player.x+=1
+-- 		-- end
 -- 		player.sprite =1+player.movecount
 -- 		--map_x-=map_speed
--- 		if (player.x-camx>(64+allowance)) then
--- 			if camx<=120 then
--- 				camx+=speed
--- 			end
--- 		end
+		if (player.x-camx>(64+allowance)) then
+			if camx<=120 then
+				camx+=speed
+			end
+		end
 -- 	end
 -- 	--if btn(2) and player.jump_allowed == true then
 --  --	player.y-=3
@@ -415,9 +519,9 @@ function move_player()
 --  	end
 --  end
 --
--- 	if btnp(4) and mode == 1 then
--- 		fire()
--- 	end
+	if btnp(4) and mode == 1 then
+		fire()
+	end
 --
 -- 	--we dont use 5 yet i think?
 -- 	--so this is for title to game
@@ -608,8 +712,6 @@ function _draw()
 		pausedraw() --mode only if 1
 	end
 
-	--print(jump_height, 100, 100)
-	-- print(player.dy, 100, 110)
 end
 
 function gamedraw()

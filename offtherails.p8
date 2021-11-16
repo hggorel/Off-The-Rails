@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 32
+version 33
 __lua__
 --basic set up sections
 --in the game
@@ -35,15 +35,19 @@ function _init()
 		x = 32,
 		y = 64,
 		flipx=false,
-		ydiff=0,
 		is_standing = true,
-		jump_height=0,
+		jump_force = 3,
+		run_force = 0.5,
 		is_blocked_right = false,
 		is_blocked_left = false,
 		is_blocked_above = false,
 		dy=0.0,
 		dx=0.0,
-		gravity=0.3
+		dy_max = 3,
+		dx_max = 1.5,
+		gravity=0.3,
+		air_resistance = 0.8,
+		friction = 0.5
 	}
 
 	--actors (enemies) table
@@ -309,8 +313,8 @@ function check_jump_height(x, y)
 	-- i starts at 8 because you want to start checking
 	-- for collision one 8x8 block below the character.
 	-- 8 < 24 will check two blocks below the character
- for i=8, 24, 1 do
- 	for j=0, 8, 1 do
+ for i=8, 15, 1 do
+ 	for j=0, 7, 1 do
  		local tile = mget((player.x+j)/8+map_x, (player.y+i)/8)
  		if (fget(tile, 0)) then
  			return (i-8)
@@ -322,74 +326,218 @@ function check_jump_height(x, y)
 	-- so we must be higher than two blocks
 	return 16
 end
+
+function check_ceiling_height()
+	-- i starts at 0 because you want to start checking
+	-- for collision one 8x8 block above the character.
+	-- 8 < 24 will check two blocks above the character
+ for i=1, 15, 1 do
+  for j=0, 7, 1 do
+  	local tile = mget((player.x + j) / 8 + map_x, (player.y - i) / 8)
+
+			if (fget(tile, 0)) then
+				return (i - 1)
+			end
+			
+		end
+	end
+ -- 16 indicates that we are at least two blocks away
+	return 16
+
+end
+
+function calculate_y_movement()
+
+	local ceiling_height = check_ceiling_height()
+	local jump_height = check_jump_height()
+
+	if (jump_height == 0) player.is_standing = true
+	if (jump_height > 0) player.is_standing = false
+
+	-- applies gravity every frame
+	if not player.is_standing then
+		player.dy -= player.gravity
+		if (player.dy < -3) player.dy = -3
+	end
+
+	-- if we are falling past the floor,
+	-- fix it by changing dy to the height from the floor
+	-- so we get sucked to the ground instead
+	if (player.dy < 0) and (player.dy + jump_height < 0) then
+		player.is_standing = true
+		player.dy = (-1 * jump_height)
+	end
+
+	if(player.dy > 0) and (player.dy - ceiling_height > 0) then
+		player.dy = (-1 * ceiling_height)
+	end
+
+	-- when the player lets go, and we are moving up
+	-- then we fraction vertical velocity to start falling sooner
+	if (not btn(2) and not player.is_standing and player.dy > 0) player.dy *= 0.5
+
+ -- jump is pressed, jump up
+	if btnp(2) and player.is_standing then
+		player.dy += player.jump_force
+		player.is_standing = false
+	end
+
+	-- make dy negative because positive dy moves character downward
+ return (-1 * player.dy)
+end
+
+function check_collide_left()
+
+	for i=1, 8, 1 do
+		for j=0, 7, 1 do
+			local tile = mget((player.x - i) / 8 + map_x, (player.y + j) / 8)
+
+			if (fget(tile, 0)) return (i - 1)
+		end
+	end
+ -- 9 indicates we are at least 1 block away
+	return 9
+
+end
+
+function check_collide_right()
+
+ for i=0, 7, 1 do
+  for j=8, 15, 1 do
+			local tile = mget((player.x + j) / 8 + map_x, (player.y + i) / 8)
+
+			if (fget(tile, 0)) return (j - 8)
+		end
+	end
+ -- 9 indicates we are at least 1 block away
+	return 9
+
+end
+
+function calculate_x_movement()
+
+	local collide_distance_right = check_collide_right()
+	local collide_distance_left = check_collide_left()
+
+	-- if we arent moving left or right,
+	-- slow down the player if they are in the air
+	if(not btn(1) and not btn(0) and not player.is_standing) then
+	 player.dx *= player.air_resistance
+	end
+	-- if we are standing instead of in the air, friction is greater
+ if(not btn(1) and not btn(0) and player.is_standing) then
+		player.dx *= player.friction
+	end
+
+	-- move right, increases until we reach max speed
+	if btn(1) then
+		player.flipx = true
+		player.dx += player.run_force
+		if (player.dx > player.dx_max) player.dx = player.dx_max
+	end
+
+	-- move left, decreases until we reach minimum speed
+	-- (-1 * player.dx_max is just the negative direction maximum)
+	if btn(0) then
+		player.flipx = false
+		player.dx -= player.run_force
+		if (player.dx < (-1 * player.dx_max)) player.dx = (-1 * player.dx_max)
+	end
+
+	if (player.dx > 0) then
+		-- snaps movement right to the wall
+		-- keep collide_distance_right positive because we are moving right
+		if(player.dx - collide_distance_right > 0) player.dx = collide_distance_right
+	end
+
+	temp_dx = player.dx
+
+	if (btn(0) and player.dx < 0) then
+		-- snaps movement left to the wall
+		-- make collide_distance_left negative cause we are moving left
+		if (player.dx + collide_distance_left < 0) then
+			player.dx = (-1 * collide_distance_left)
+		end
+ end
+
+	return player.dx
+
+end
+
  		
 function move_player()
 
 	local allowance=28
-	local speed=1
-	player.jump_height = check_jump_height()
+	--local speed=1
+	--jump_height = check_jump_height()
 
 	local tile_below_character = mget((player.x) / 8 + map_x, (player.y + 8) / 8)
  local tile_below_character_collidable = fget(tile_below_character, 0)
-
-	local tile_above = mget((player.x) / 8+map_x, (player.y) / 8)
+ local tile_above = mget((player.x) / 8+map_x, (player.y) / 8)
  local tile_above_collidable = fget(tile_above, 0)
-
 	local tile_right_character = mget((player.x +8)/8+map_x, player.y/8)
 	local tile_right_collidable = fget(tile_right_character, 0)
-
 	local tile_left_character = mget((player.x)/8+map_x, player.y/8)
 	local tile_left_collidable = fget(tile_left_character, 0)
 
 	flip_switch(tile_right_character, tile_left_character)
-
- if (tile_below_character_collidable) then
- 	player.is_standing = true
-  player.dy = 0
- else
-  player.is_standing = false
- 	if (player.dy <= -3.0) then
- 		player.dy = -3.0
- 	else
- 		player.dy-=player.gravity
- 	end
- end
-
- if (tile_above_collidable) then
- 	player.is_blocked_above = true
- 	if player.is_standing then
- 		player.dy=0
- 	else
- 		player.dy=-player.gravity
- 	end
- else
- 	player.is_blocked_above = false
- end
-
- if (tile_right_collidable) then
-		player.is_blocked_right = true
-	else
-		player.is_blocked_right = false
-	end
-
-	if (tile_left_collidable) then
-		player.is_blocked_left = true
-	else
-		player.is_blocked_left = false
+	
+	x_move = calculate_x_movement()
+	y_move = calculate_y_movement()
+	local speed = abs(player.dx)
+	player.x += x_move
+	player.y += y_move
+	if x_move>0 then
+		player.sprite =1+player.movecount
 	end
 	
-	if btnp(2) and player.is_standing and not(player.is_blocked_above) then
-		player.dy = 3
-		player.is_standing = false
-	end
+ --if (tile_below_character_collidable) then
+ --	player.is_standing = true
+ -- player.dy = 0
+ --else
+ -- player.is_standing = false
+ --	if (player.dy <= -3.0) then
+ --		player.dy = -3.0
+ --	else
+ --		player.dy-=player.gravity
+ --	end
+ --end
+
+ --if (tile_above_collidable) then
+ --	player.is_blocked_above = true
+ --	if player.is_standing then
+ --		player.dy=0
+ --	else
+ --		player.dy=-player.gravity
+ --	end
+ --else
+ --	player.is_blocked_above = false
+ --end
+
+ --if (tile_right_collidable) then
+	--	player.is_blocked_right = true
+	--else
+	--	player.is_blocked_right = false
+	--end
+
+	--if (tile_left_collidable) then
+	--	player.is_blocked_left = true
+	--else
+	--	player.is_blocked_left = false
+	--end
+	
+	--if btnp(2) and player.is_standing and not(player.is_blocked_above) then
+	--	player.dy = 3
+	--	player.is_standing = false
+	--end
 
  -- moving player based on input
-	if btn(0) and not(player.is_blocked_left) then
-		player.flipx=false
-		if player.x>0 then
-			player.x-=1
-		end
-		player.sprite=1+player.movecount
+	--if btn(0) and not(player.is_blocked_left) then
+	--	player.flipx=false
+	--	if player.x>0 then
+	--		player.x-=1
+	--	end
+	--!!	player.sprite=1+player.movecount
 
 		if(player.x-camx<(64-allowance)) then
 			if camx<=0 then
@@ -399,27 +547,27 @@ function move_player()
 			end
 		end
 
-	end
-	if btn(1) and not(player.is_blocked_right) then
-		player.flipx=true
-		if player.x<240 then
-			player.x+=1
-		end
-		player.sprite =1+player.movecount
+	--end
+	--if btn(1) and not(player.is_blocked_right) then
+	--	player.flipx=true
+	--	if player.x<240 then
+	--		player.x+=1
+	--	end
+	--!!	player.sprite =1+player.movecount
 		--map_x-=map_speed
 		if (player.x-camx>(64+allowance)) then
 			if camx<=120 then
 				camx+=speed
 			end
 		end
-	end
+	--end
 
-	if(player.dy < 0 and (player.dy + player.jump_height)<0 and player.jump_height>0) then
-		player.dy = (-1 * player.jump_height)
-	end
+	--if(player.dy < 0 and (player.dy + jump_height)<0 and jump_height>0) then
+	--	player.dy = (-1 * jump_height)
+	--end
 
  -- make dy negative because positive dy moves character downward
- player.y += (-1 * player.dy)
+ --player.y += (-1 * player.dy)
 
  if btnp(3) then
  	local tile_character_on = mget(player.x / 8+map_x, player.y / 8)
@@ -1109,15 +1257,15 @@ __gff__
 0000000000000000000000000000000000000000000000000000000000000000010000000000000000000000020200000200000000000000000000010202000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000100010101010000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
-2b3232322b32322b3232322b32322b3232322b32322b3232322b2b323232322b000000009584848493858686879384848485868784848493848484849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-323232323232323232323232323232323232323232323232323232323232322b000000009584848493979797979384848484848484848493848484849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-323232322e32322e3232322e32322e3232322e32322e3232322e2e32322e322b000000009584828493848484849384858784848485878493848484849384828495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-323232323e31313e3131313e31313e3131313e31313e3131313e3e31393e312b00000000958484849384848484938484848484848484849384a2a2849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-323232322020202020202020202020202020202020202020202020202020202b00000000959292928384848484839292929292929292929284b2b2849292929295000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-323220322b32322b3232322b32322b3232322b32322b3220322b2b3232322b2b000000009584848493848484849384848484848484848483929292928384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-323232323232323232323232323232323232323232323220323232323232322b000000009584848493848484849384848484848484848493848484849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-202232212232322122322122323221223221223232212232322122323221222b000000009585868793858686879384858784848485878493848484849385868795000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-313131313131313131313131313131313131313131313132322c2c323131312b00000000958488849384848484938484848484848484849384a6a5849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+203232322b32322b3232322b32322b3232322b32322b3232322b2b3232323220000000009584848493858686879384848485868784848493848484849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2032323232323232323232323232323232323232323232323232323232323220000000009584848493979797979384848484848484848493848484849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+203232322e32322e3232322e32322e3232322e32322e3232322e2e32322e3220000000009584828493848484849384858784848485878493848484849384828495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+203232323e31313e3131313e31313e3131313e31313e3131313e3e31393e312000000000958484849384848484938484848484848484849384a2a2849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+203232322020202020202020202020202020202020202020202020202020202000000000959292928384848484839292929292929292929284b2b2849292929295000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+203220322b32322b3232322b32322b3232322b32322b3220322b2b3232322b20000000009584848493848484849384848484848484848483929292928384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2032323232323232323232323232323232323232323232203232323232323220000000009584848493848484849384848484848484848493848484849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+2020322122323221223221223232212232212232322122323221223232212220000000009585868793858686879384858784848485878493848484849385868795000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+203131313131313131313131313131313131313131313132322c2c323131312000000000958488849384848484938484848484848484849384a6a5849384848495000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 202020202020202020202020202020202020202020202020313c3c312020202000000000969494949484848484949494949494949494949484b6b5849494949696000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000002020202020200000000000000000000000969494949496a1000000000000000096949494949600000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

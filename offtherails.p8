@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 32
+version 33
 __lua__
 --basic set up sections
 --in the game
@@ -90,7 +90,7 @@ function _init()
 	danger = {}
 	bullets = {}
 	if level == 1 then
-		create_soldier(32, 64)
+		create_soldier(40, 64)
 		create_soldier(160, 64)
 	end
 	
@@ -102,18 +102,18 @@ function _init()
 
 	lives={}
 	heart1 = {
-		x=1,
-		y=20,
+		x=60,
+		y=0,
 		sprite=68
 	}
 	heart2={
-		x=9,
-		y=20,
+		x=68,
+		y=0,
 		sprite=68
 	}
 	heart3={
-		x=17,
-		y=20,
+		x=76,
+		y=0,
 		sprite=68
 	}
 	add(lives, heart1)
@@ -126,12 +126,15 @@ function fire()
 		sprite=56,
 		x=player.x,
 		y=player.y,
-		dx=2,
+		dx=3,
 		dy=0
 	}
 
 	if player.flipx==false then
-		bullet.dx=-2
+		bullet.dx=-3
+		bullet.x-=3
+	else
+		bullet.x+=5
 	end
 
 	add(bullets, bullet)
@@ -472,7 +475,7 @@ end
  		
 function move_player()
 
-	local allowance=28
+	local allowance=14
 	--local speed=1
 	--jump_height = check_jump_height()
 
@@ -584,25 +587,24 @@ function _update()
 	--gameplay mode updates
 	if mode == 1 then
 	
-	
-	local player_right_character = mget((player.x +8)/8, player.y/8)
+	local player_right_character = mget((player.x +8)/8 + map_x, player.y/8)
 	local player_right_collidable = fget(player_right_character, 0)
 
-	local player_left_character = mget((player.x)/8, player.y/8)
+	local player_left_character = mget((player.x)/8 + map_x, player.y/8)
 	local player_left_collidable = fget(player_left_character, 0)
 
 	-- moving all of the bullets
 	for b in all(bullets) do
-		local tile_below = mget(b.x / 8, (b.y + 8) / 8)
+		local tile_below = mget(b.x / 8+map_x, (b.y + 8) / 8)
  	local tile_below_collidable = fget(tile_below, 0)
 
-		local tile_above = mget((b.x+4) / 8, (b.y-1) / 8)
+		local tile_above = mget((b.x) / 8 + map_x, (b.y-1) / 8)
  	local tile_above_collidable = fget(tile_above, 0)
 
-		local tile_right = mget((b.x +8)/8, b.y/8)
+		local tile_right = mget((b.x +8)/8 + map_x, b.y/8)
 		local tile_right_collidable = fget(tile_right, 0)
 
-		local tile_left = mget((b.x)/8, b.y/8)
+		local tile_left = mget((b.x)/8 + map_x, b.y/8)
 		local tile_left_collidable = fget(tile_left, 0)
 		
 		b.x+=b.dx
@@ -624,16 +626,16 @@ function _update()
 	end
 
 	for e in all(danger) do
-		local tile_below = mget(e.x / 8, (e.y + 8) / 8)
+		local tile_below = mget(e.x / 8 + map_x, (e.y + 8) / 8)
  	local tile_below_collidable = fget(tile_below, 0)
 
-		local tile_above = mget((e.x+4) / 8, (e.y-1) / 8)
+		local tile_above = mget((e.x+4) / 8 + map_x, (e.y-1) / 8)
  	local tile_above_collidable = fget(tile_above, 0)
 
-		local tile_right = mget((e.x +8)/8, e.y/8)
+		local tile_right = mget((e.x +8)/8 + map_x, e.y/8)
 		local tile_right_collidable = fget(tile_right, 0)
 
-		local tile_left = mget((e.x)/8, e.y/8)
+		local tile_left = mget((e.x)/8 + map_x, e.y/8)
 		local tile_left_collidable = fget(tile_left, 0)
 		
 		e.x+=e.dx
@@ -842,7 +844,7 @@ function gamedraw()
 		camera()
 		print('health', 1, 1, 6)
 		rectfill(1,8, player.health,9,8)
-		print('lives', 1, 13, 6)
+		print('lives', 40, 1, 6)
 		for h in all(lives) do
 			spr(h.sprite, h.x, h.y)
 		end
@@ -1026,7 +1028,7 @@ function level2draw()
 	camera()
 	print('health', 1, 1, 6)
 	rectfill(1,8, player.health,9,8)
-	print('lives', 1, 13, 6)
+	print('lives', 40, 1, 6)
 	for h in all(lives) do
 		spr(h.sprite, h.x, h.y)
 	end

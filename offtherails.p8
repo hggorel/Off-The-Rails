@@ -244,7 +244,7 @@ function moving_soldier()
 		local tile_above = mget((actor.x) / 8+map_x, (actor.y-1) / 8)
  	local tile_above_collidable = fget(tile_above, 0)
 
-		local tile_right = mget((actor.x +7)/8+ map_x, actor.y/8)
+		local tile_right = mget((actor.x +8)/8+ map_x, actor.y/8)
 		local tile_right_collidable = fget(tile_right, 0)
 
 		local tile_left = mget((actor.x)/8+ map_x, actor.y/8)
@@ -271,33 +271,31 @@ function moving_soldier()
 				basic_shoot(actor.x, actor.y, actor.flipx)
 			end
 			actor.shootcount+=1
-		end
+		
 
 		-- if the enemy is bames jond
 		-- bames' bullets will shoot directly at
 		-- our hero, even if not striaght
-		if actor.sprite>=21 and actor.sprite <=25 then
+		elseif actor.sprite>=21 and actor.sprite <=25 then
 			actor.x+=1
-		end
+		
 
 		-- if the enemy is herlock sholmes
 		-- we want herlock to track him down
-		if actor.sprite>=26 and actor.sprite <=30 then
-			if player.x < actor.x then
-				 if not(tile_left_collidable) then
-						actor.x -= 0.5 -- move towards
-						actor.flipx = true
-					end
+		elseif actor.sprite>=26 and actor.sprite <=30 then
+			if not(tile_below_collidable) then
+				actor.y += player.gravity
+			elseif player.x < actor.x then
+				if not(tile_left_collidable) then
+					actor.x -= 0.5 -- move towards
+					actor.flipx = true
+				end
 			else
 				if not(tile_right_collidable) then
 					actor.x += 0.5 -- move towards
 					actor.flipx = false
 				end
-			end
-			
-			if not(tile_below_collidable) then
-				actor.y += player.gravity
-			end
+			end	
 
 			if actor.movecount < 20 and actor.movecount/5 ==0 then
 				--actor.y+=1
@@ -313,8 +311,8 @@ function moving_soldier()
 			end
 			actor.shootcount+=1
 		end
-
 	end
+	
 end
 
 function check_jump_height(x, y)
@@ -801,6 +799,11 @@ function _draw()
 		gamedraw()
 	else
 		pausedraw()
+	end
+	
+	print(count(enemies), 100, 100)
+	for e in all(enemies) do
+		print(e.sprite, 100, 110)
 	end
 
 end

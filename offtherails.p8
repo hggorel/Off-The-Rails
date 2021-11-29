@@ -12,7 +12,7 @@ function _init()
 	if mode == 0 then
 		titleupdate()
 	end
-	
+
 	--figure out music funtions
 	--better
 	music(0)
@@ -93,7 +93,7 @@ function _init()
 		create_soldier(32, 64)
 		create_soldier(160, 64)
 	end
-	
+
 
 	map_x=0
 	map_speed=1
@@ -177,18 +177,31 @@ function herlock_shoot(startx, starty, targetx, targety)
 
 end
 
-function create_soldier(newx, newy)
-	local actor ={
-		movecount=0,
-		flipx=false,
-		shootcount=0,
-		health = 5,
-		sprite = 16,
-		x = newx,
-		y = newy
+function create_enemy(type, sprite, x, y, health)
+	local actor = {
+		type = type,
+		sprite = sprite,
+		move_count = 0,
+		shoot_count = 0,
+		health = health,
+		flipx = false,
+		is_standing = true,
+		x=x,
+		y=y,
+		dy=0.0,
+		dx=0.0,
+		dy_max = 3,
+		dx_max = 1,
+		gravity=0.3,
+		air_resistance = 0.8,
+		friction = 0.5
 	}
 
 	add(enemies, actor)
+end
+
+function create_soldier(x, y)
+	create_enemy("soldier", 16, x, y, 5)
 end
 
 function create_bames(newx, newy)
@@ -233,7 +246,16 @@ function flip_switch(right_tile, left_tile)
 	end
 end
 
-function moving_soldier()
+function move_soldier(soldier)
+	soldier_collide_distance_right = check_collide_right(soldier)
+	local soldier_collide_distance_left = check_collide_left(soldier)
+
+	soldier.x += 1
+
+	position = soldier.x
+end
+
+function moving_actors()
 	for actor in all(enemies) do
 		local tile_below = mget((actor.x)/ 8+map_x, (actor.y + 7) / 8)
  	local tile_below_collidable = fget(tile_below, 0)
@@ -247,71 +269,75 @@ function moving_soldier()
 		local tile_left = mget((actor.x)/8+ map_x, actor.y/8)
 		local tile_left_collidable = fget(tile_left, 0)
 
-		-- if the enemy is a soldier
-		if actor.sprite <=20 and actor.sprite >=16 then
-			if actor.movecount<5 then
-				actor.x+=1
-				actor.flipx=false
-			end
-			if actor.movecount>5 then
-				actor.flipx=true
-				actor.x-=1
-			end
-
-			if actor.movecount<10 then
-				actor.movecount+=1
-			else
-				actor.movecount=0
-			end
-
-			if actor.shootcount%20==0 then
-				basic_shoot(actor.x, actor.y, actor.flipx)
-			end
-			actor.shootcount+=1
+		if actor.type == "soldier" then
+			move_soldier(actor)
 		end
-
-		-- if the enemy is bames jond
-		-- bames' bullets will shoot directly at
-		-- our hero, even if not striaght
-		if actor.sprite>=21 and actor.sprite <=25 then
-			actor.x+=1
-		end
-
-		-- if the enemy is herlock sholmes
-		-- we want herlock to track him down
-		if actor.sprite>=26 and actor.sprite <=30 then
-			if player.x < actor.x then
-				 if not(tile_left_collidable) then
-						actor.x -= 0.5 -- move towards
-						actor.flipx = true
-					end
-			else
-				if not(tile_right_collidable) then
-					actor.x += 0.5 -- move towards
-					actor.flipx = false
-				end
-			end
-			
-			if not(tile_below_collidable) then
-				actor.y += player.gravity
-			end
-
-			if actor.movecount < 20 and actor.movecount/5 ==0 then
-				--actor.y+=1
-				actor.movecount += 1
-				actor.sprite += 1
-			else
-				actor.sprite = 26
-				actor.movecount=0
-			end
-
-			if actor.shootcount%20 == 0 then
-				herlock_shoot(actor.x, actor.y, player.x, player.y)
-			end
-			actor.shootcount+=1
-		end
-
 	end
+		-- if the enemy is a soldier
+	-- 	if actor.sprite <=20 and actor.sprite >=16 then
+	-- 		if actor.movecount<5 then
+	-- 			actor.x+=1
+	-- 			actor.flipx=false
+	-- 		end
+	-- 		if actor.movecount>5 then
+	-- 			actor.flipx=true
+	-- 			actor.x-=1
+	-- 		end
+	--
+	-- 		if actor.movecount<10 then
+	-- 			actor.movecount+=1
+	-- 		else
+	-- 			actor.movecount=0
+	-- 		end
+	--
+	-- 		if actor.shootcount%20==0 then
+	-- 			basic_shoot(actor.x, actor.y, actor.flipx)
+	-- 		end
+	-- 		actor.shootcount+=1
+	-- 	end
+	--
+	-- 	-- if the enemy is bames jond
+	-- 	-- bames' bullets will shoot directly at
+	-- 	-- our hero, even if not striaght
+	-- 	if actor.sprite>=21 and actor.sprite <=25 then
+	-- 		actor.x+=1
+	-- 	end
+	--
+	-- 	-- if the enemy is herlock sholmes
+	-- 	-- we want herlock to track him down
+	-- 	if actor.sprite>=26 and actor.sprite <=30 then
+	-- 		if player.x < actor.x then
+	-- 			 if not(tile_left_collidable) then
+	-- 					actor.x -= 0.5 -- move towards
+	-- 					actor.flipx = true
+	-- 				end
+	-- 		else
+	-- 			if not(tile_right_collidable) then
+	-- 				actor.x += 0.5 -- move towards
+	-- 				actor.flipx = false
+	-- 			end
+	-- 		end
+	--
+	-- 		if not(tile_below_collidable) then
+	-- 			actor.y += player.gravity
+	-- 		end
+	--
+	-- 		if actor.movecount < 20 and actor.movecount/5 ==0 then
+	-- 			--actor.y+=1
+	-- 			actor.movecount += 1
+	-- 			actor.sprite += 1
+	-- 		else
+	-- 			actor.sprite = 26
+	-- 			actor.movecount=0
+	-- 		end
+	--
+	-- 		if actor.shootcount%20 == 0 then
+	-- 			herlock_shoot(actor.x, actor.y, player.x, player.y)
+	-- 		end
+	-- 		actor.shootcount+=1
+	-- 	end
+	--
+	-- end
 end
 
 function check_jump_height(x, y)
@@ -343,7 +369,7 @@ function check_ceiling_height()
 			if (fget(tile, 0)) then
 				return (i - 1)
 			end
-			
+
 		end
 	end
  -- 16 indicates that we are at least two blocks away
@@ -391,11 +417,11 @@ function calculate_y_movement()
  return (-1 * player.dy)
 end
 
-function check_collide_left()
+function check_collide_left(actor)
 
 	for i=1, 8, 1 do
 		for j=0, 7, 1 do
-			local tile = mget((player.x - i) / 8 + map_x, (player.y + j) / 8)
+			local tile = mget((actor.x - i) / 8 + map_x, (actor.y + j) / 8)
 
 			if (fget(tile, 0)) return (i - 1)
 		end
@@ -405,11 +431,11 @@ function check_collide_left()
 
 end
 
-function check_collide_right()
+function check_collide_right(actor)
 
  for i=0, 7, 1 do
   for j=8, 15, 1 do
-			local tile = mget((player.x + j) / 8 + map_x, (player.y + i) / 8)
+			local tile = mget((actor.x + j) / 8 + map_x, (actor.y + i) / 8)
 
 			if (fget(tile, 0)) return (j - 8)
 		end
@@ -421,8 +447,8 @@ end
 
 function calculate_x_movement()
 
-	local collide_distance_right = check_collide_right()
-	local collide_distance_left = check_collide_left()
+	local collide_distance_right = check_collide_right(player)
+	local collide_distance_left = check_collide_left(player)
 
 	-- if we arent moving left or right,
 	-- slow down the player if they are in the air
@@ -469,7 +495,7 @@ function calculate_x_movement()
 
 end
 
- 		
+
 function move_player()
 
 	local allowance=28
@@ -486,13 +512,13 @@ function move_player()
 	local tile_left_collidable = fget(tile_left_character, 0)
 
 	flip_switch(tile_right_character, tile_left_character)
-	
+
 	x_move = calculate_x_movement()
 	y_move = calculate_y_movement()
 	local speed = abs(player.dx)
 	player.x += x_move
 	player.y += y_move
-	
+
 	if abs(x_move)>0 then
 			-- switching to see animation
 		if player.movecount==3 then
@@ -542,13 +568,13 @@ function move_player()
 				player.x=176
 				player.y=72
 			end
-			
+
 			if level == 3 then
 				gamewin=true
 			end
-			
+
  	end
- 	
+
  	if tile_character_on ==57 then
  		mset(player.x/8, player.y/8, 58)
  		mset(23, 7, 50)
@@ -579,12 +605,12 @@ function _update()
 	else
 		pauseupdate()
 	end
-	--colorblind settings? 
-	
+	--colorblind settings?
+
 	--gameplay mode updates
 	if mode == 1 then
-	
-	
+
+
 	local player_right_character = mget((player.x +8)/8, player.y/8)
 	local player_right_collidable = fget(player_right_character, 0)
 
@@ -604,10 +630,10 @@ function _update()
 
 		local tile_left = mget((b.x)/8, b.y/8)
 		local tile_left_collidable = fget(tile_left, 0)
-		
+
 		b.x+=b.dx
 		b.y+=b.dy
-		
+
 		if b.dx < 0 and tile_left_collidable then
 			del(bullets, b)
 		elseif b.dx > 0 and tile_right_collidable then
@@ -617,7 +643,7 @@ function _update()
 		elseif b.dy > 0 and tile_below_collidable then
 			del(bullets, b)
 		end
-		
+
 		if b.x<camx-128 or b.x > camx+128 or b.y < 0 or b.y>128 then
 			del(bullets, b)
 		end
@@ -635,10 +661,10 @@ function _update()
 
 		local tile_left = mget((e.x)/8, e.y/8)
 		local tile_left_collidable = fget(tile_left, 0)
-		
+
 		e.x+=e.dx
 		e.y+=e.dy
-		
+
 		if e.dx < 0 and tile_left_collidable then
 			del(danger, e)
 		elseif e.dx > 0 and tile_right_collidable then
@@ -648,7 +674,7 @@ function _update()
 		elseif e.dy > 0 and tile_below_collidable then
 			del(danger, e)
 		end
-		
+
 		if e.x<camx-128 or e.x>camx+128 or e.y<0 or e.y>128 then
 			del(danger, e)
 		end
@@ -660,7 +686,7 @@ function _update()
 
 	move_player()
 
-	moving_soldier()
+	moving_actors()
 
 	-- removing enemies that have been shot
 	for e in all(enemies) do
@@ -801,6 +827,8 @@ function _draw()
 		pausedraw()
 	end
 
+	print(position, 100, 100)
+	print(player.x, 100, 110)
 end
 
 function gamedraw()
@@ -820,7 +848,7 @@ function gamedraw()
  	if colblind == 0 then
  	pal()
  	end
- 	
+
  	map(0, 0, 0, 0, 32*8, 9*8)
  	_drawmapsprites()
  	_moveextra()
@@ -861,12 +889,12 @@ function gamedraw()
 	if level == 2 and gameover == false then
 		level2draw()
 	end
-	
+
 	if gamewin then
 		cls(1)
 		_winscreen()
 	end
-	
+
 end
 
 function _winscreen()
@@ -902,8 +930,8 @@ function _drawmapsprites()
 		if level == 1 then
 		spr(41,04*8,08*8,1,1,true,false)
 		spr(41,07*8,08*8) --booths
-		spr(41,11*8,08*8,1,1,true,false) 
-		spr(41,14*8,08*8) 
+		spr(41,11*8,08*8,1,1,true,false)
+		spr(41,14*8,08*8)
 		spr(41,18*8,08*8,1,1,true,false)
 		spr(41,21*8,08*8)
 		end
@@ -1004,7 +1032,7 @@ function level2draw()
 	cls(0)
  camera(camx, -16)
  pal(13,134,1)
- drawclouds() 
+ drawclouds()
  map(36, 0, 0, 0, 32*8, 9*8)
  _drawmapsprites()
  _moveextra()
@@ -1012,7 +1040,7 @@ function level2draw()
 	if player.lives>0 then
 		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
 	end
-		
+
 	for e in all(enemies) do
 		spr(e.sprite, e.x, e.y, 1, 1, e.flipx, false)
 	end
@@ -1054,7 +1082,7 @@ function setting()
 	print("press ⬇️ to interact",17,60,7)
 	print("press x for inventory", 15,70,7)
 	print("...and still x to start", 15,80,7)
-	
+
 end
 
 function colorflip()
@@ -1137,8 +1165,8 @@ end
 
 function drawcutscene()
 	cls()
-	
-	
+
+
 	text1()
 	text2()
 end
@@ -1148,9 +1176,9 @@ function text1()
 	print("north england, 196x")
 	--bottom of screen
 	print("press ➡️ to continue",40,100,0)
-	
-		
-		if cc == 1 then	
+
+
+		if cc == 1 then
 		print(".",4,5,7)
 		end
 		if cc == 2 then
@@ -1159,7 +1187,7 @@ function text1()
 		if  cc == 3 then
 		print(". . .",4,5,7)
 		end
-	
+
 end
 
 function text2()
@@ -1485,4 +1513,3 @@ __music__
 00 00424344
 00 00424344
 00 00424344
-

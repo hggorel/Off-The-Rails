@@ -246,13 +246,45 @@ function flip_switch(right_tile, left_tile)
 	end
 end
 
+function check_ledge_left(actor)
+
+	for i=1, 2, 1 do
+		local tile = mget((actor.x - i) / 8 + map_x, (actor.y + 8) / 8)
+
+		if(not fget(tile, 0)) return i
+	end
+
+	return 3
+
+end
+
+function check_ledge_right(actor)
+
+	for i=8, 9, 1 do
+		local tile = mget((actor.x + i) / 8 + map_x, (actor.y + 8) / 8)
+
+		if(not fget(tile, 0)) return (i - 7)
+	end
+
+	return 3
+
+end
+
 function move_soldier(soldier)
-	soldier_collide_distance_right = check_collide_right(soldier)
-	local soldier_collide_distance_left = check_collide_left(soldier)
 
-	soldier.x += 1
+	local distance_right = check_collide_right(soldier)
+	local distance_left = check_collide_left(soldier)
 
-	position = soldier.x
+	-- ledge detection to switch actor direction
+	ledge_dist_left = check_ledge_left(soldier)
+	ledge_dist_right = check_ledge_right(soldier)
+
+	if(soldier.flipx and (distance_left < 1 or ledge_dist_left < 2)) soldier.flipx = false
+	if(not soldier.flipx and (distance_right < 1 or ledge_dist_right < 2)) soldier.flipx = true
+
+	if(soldier.flipx and distance_left >= 1) soldier.x -= 1
+	if(not soldier.flipx and distance_right >= 1) soldier.x += 1
+
 end
 
 function moving_actors()
@@ -346,7 +378,8 @@ function check_jump_height(x, y)
 	-- 8 < 24 will check two blocks below the character
  for i=8, 15, 1 do
  	for j=0, 7, 1 do
- 		local tile = mget((player.x+j)/8+map_x, (player.y+i)/8)
+ 		local tile = mget((player.x + j) / 8 + map_x, (player.y + i) / 8)
+
  		if (fget(tile, 0)) then
  			return (i-8)
  		end
@@ -513,8 +546,8 @@ function move_player()
 
 	flip_switch(tile_right_character, tile_left_character)
 
-	x_move = calculate_x_movement()
-	y_move = calculate_y_movement()
+	local x_move = calculate_x_movement()
+	local y_move = calculate_y_movement()
 	local speed = abs(player.dx)
 	player.x += x_move
 	player.y += y_move
@@ -827,8 +860,8 @@ function _draw()
 		pausedraw()
 	end
 
-	print(position, 100, 100)
-	print(player.x, 100, 110)
+	print(ledge_dist_right, 100, 100)
+	print(ledge_dist_left, 100, 110)
 end
 
 function gamedraw()

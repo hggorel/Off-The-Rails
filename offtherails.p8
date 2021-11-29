@@ -227,6 +227,22 @@ function create_herlock(newx, newy)
 	add(enemies, actor)
 end
 
+
+--adding a wizard function
+function create_merlin(newx, newy)
+	local actor = {
+		movecount=0,
+		flipx=false,
+		shootcount=0,
+		health=33, --undecided on health
+		sprite=98,
+		x = newx,
+		y = newy
+	}
+
+	add(enemies, actor)
+end
+
 function flip_switch(right_tile, left_tile)
 	if right_tile == 136 then
 		mset((player.x+8)/8+map_x, player.y/8, 137)
@@ -316,6 +332,11 @@ function moving_soldier()
 			end
 			actor.shootcount+=1
 		end
+	end
+	
+	--wizard movement
+	if actor.sprite >= 98 or actor.sprite <= 99 then
+
 	end
 	
 end
@@ -1180,6 +1201,7 @@ if cloud.x > 260 then
 end
 end
 
+
 -->8
 --cutscenes (story elements)
 cc = 0 --click counter
@@ -1305,7 +1327,6 @@ end
 function tutorialmap()
 cls()
 --need to muck w these rectangles
-rectfill(0,0,132,132)
 rectfill(0,61,132,132)
 --muck with map (may not be drawing--havent tested)
 --tutorial map is in upper right corner
@@ -1315,6 +1336,13 @@ map(110,0,0,10,14*8,20*8)
 --text boxes have flag 4
 
 end
+
+--formatting for printing tutorial etc?
+function txtbox()
+ rectfill(2,
+end
+
+
 __gfx__
 00000000008888800088880000888800008888000088880000888800008888000088888000888880008888000000a00000000000000000000000100000000000
 0000000008fff88000f8888000f8888000f8888000f8888000f8888000f8888008fff88008fff88008fff880000aa00000000000000000000001110000000000

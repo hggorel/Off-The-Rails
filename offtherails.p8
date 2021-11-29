@@ -242,10 +242,10 @@ end
 
 function moving_soldier()
 	for actor in all(enemies) do
-		local tile_below = mget((actor.x)/ 8+map_x, (actor.y + 7) / 8)
+		local tile_below = mget((actor.x)/ 8+map_x, (actor.y + 8) / 8)
  	local tile_below_collidable = fget(tile_below, 0)
 
-		local tile_above = mget((actor.x) / 8+map_x, (actor.y-1) / 8)
+		local tile_above = mget((actor.x) / 8+map_x, (actor.y) / 8)
  	local tile_above_collidable = fget(tile_above, 0)
 
 		local tile_right = mget((actor.x +8)/8+ map_x, actor.y/8)

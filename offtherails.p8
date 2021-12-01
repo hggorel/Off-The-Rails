@@ -8,7 +8,7 @@ __lua__
 
 function _init()
 	mode = 0 --for title call
-	level= 1 --for changing levels
+	level= 0 --for changing levels
 	colblind = 0 --for colorblind settings
 	if mode == 0 then
 		titleupdate()
@@ -347,9 +347,9 @@ function moving_soldier()
 	end
 	
 	--wizard movement
-	if actor.sprite >= 98 or actor.sprite <= 99 then
+--	if actor.sprite >= 98 or actor.sprite <= 99 then
 
-	end
+--	end
 	
 end
 
@@ -869,6 +869,34 @@ end
 	
 function gamedraw()
 	--will need to readjust levels for tutorial map
+	if level==0 and levelwin==false and gameover==false then
+		cls(5)
+ 	camera(camx, -20)
+ 	map_x = 110
+ 	drawclouds()
+ 	
+ 		if colblind == 1 then
+ 	pal(3,130,1)--check this
+ 	pal(11,137,1)
+ 	end
+ 	if colblind == 0 then
+ 	pal()
+ 	end
+ 	
+ 	tutorialmap()
+ 	
+ 	if player.lives>0 then
+			spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
+		end
+		--may work?
+		tutorialtext(player.x,player.y)
+		camera()
+		print('health', 1, 1, 6)
+		rectfill(1,8, player.health,9,8)
+		print('lives', 40, 1, 6)
+ 	
+	end
+	
 	if level==1 and levelwin==false and gameover==false then
  	cls(5)
  	camera(camx, -16)
@@ -1362,29 +1390,38 @@ end
 --may need to add text box to explain limited bullets and etc.
 --putting this here until better knowledge of where to put it
 --could pass parameter location for whichever text to print
-function tutorialtext()
+function tutorialtext(site,below)
 --nothing fomratted yet
 --first box
+if site == 112*8 and below == 11*8 then
 print("welcome to off the rails!",0,0,7)
 print("and welcome to train twm sion cati",0,0,7)
 print("on trains, people use 'arrow keys' to move",0,0,7)
+end
 --second box
+if site == 116*8 and below == 11*8 then 
 print("trains tend to be passennger or cargo trains",0,0,7)
 print("this one happens to be a passenger train",0,0,7)
 print("so you'll see some other passengers--let them be",0,0,7)
+end
 --third box
+if site == 121*8 and below == 11*8 then
 print("you may notice some guys with guns",0,0,7)
 print("this is because you stole the queen's crown",0,0,7)
 print("press z or 🅾️ to shoot them before they get you!",0,0,7)
+end
 --fourth box
+if site == 113*8 and below == 5*8 then
 print("to interact and solve puzzles",0,0,7)
 print("hit ⬇️ while on top of the object",0,0,7)
 print("in england, this is known as takin a gander",0,0,7)
+end
 --fifth box
+if site == 123*8 and below == 5*8 then
 print("you'll need to hit ⬇️ twice to go thru doors",0,0,7)
 print("before you go, though, try hitting 'x' or ❎",0,0,7)
 print("this enters (and leaves) your inventory",0,0,7)
-
+end
 end
 
 --tutorial map

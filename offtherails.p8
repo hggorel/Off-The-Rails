@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 32
+version 33
 __lua__
 
 --basic set up sections
@@ -274,13 +274,13 @@ function moving_soldier()
 		local tile_below = mget((actor.x)/ 8+map_x, (actor.y + 8) / 8)
  	local tile_below_collidable = fget(tile_below, 0)
 
-		local tile_above = mget((actor.x) / 8+map_x, (actor.y) / 8)
+		local tile_above = mget((actor.x) / 8+map_x, (actor.y-8) / 8)
  	local tile_above_collidable = fget(tile_above, 0)
 
 		local tile_right = mget((actor.x +8)/8+ map_x, actor.y/8)
 		local tile_right_collidable = fget(tile_right, 0)
 
-		local tile_left = mget((actor.x)/8+ map_x, actor.y/8)
+		local tile_left = mget((actor.x-8)/8+ map_x, actor.y/8)
 		local tile_left_collidable = fget(tile_left, 0)
 
 		-- if the enemy is a soldier
@@ -311,7 +311,6 @@ function moving_soldier()
 		-- our hero, even if not striaght
 		elseif actor.sprite>=21 and actor.sprite <=25 then
 			actor.x+=1
-		
 
 		-- if the enemy is herlock sholmes
 		-- we want herlock to track him down
@@ -347,9 +346,9 @@ function moving_soldier()
 	end
 	
 	--wizard movement
-	if actor.sprite >= 98 or actor.sprite <= 99 then
+	--if actor.sprite >= 98 or actor.sprite <= 99 then
 
-	end
+	--end
 	
 end
 
@@ -725,7 +724,7 @@ function _update()
 	-- removing enemies that have been shot
 	for e in all(enemies) do
 		for b in all(bullets) do
-			if abs(b.x - e.x)<=1 and abs(b.y-e.y)<=5 then
+			if abs(b.x - e.x)<=3 and abs(b.y-e.y)<=5 then
 				e.health-=5
 				del(bullets, b)
 				if e.health <=0 then
@@ -1255,6 +1254,13 @@ function drawclouds()
 	spr(cloud.spr1,cloud.x,cloud.y)
 	spr(cloud.spr2,cloud.x+10,cloud.y+37)
 	spr(cloud.spr1,cloud.x+30,cloud.y-22)
+	end
+	if level == 3 then
+	rectfill(0, 0, 225, 70, 12)
+	moveclouds()
+	spr(cloud.spr1, cloud.x, cloud.y)
+	spr(cloud.spr2, cloud.x+10, cloud.y+34)
+	spr(cloud.spr1, cloud.x+20, cloud.y-22)
 	end
 end
 

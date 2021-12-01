@@ -35,6 +35,7 @@ function _init()
 	player ={
 		movecount=1,
 		sprite = 1,
+		sprite_speed = 3,
 		health = 50,
 		lives=3,
 		x = 32,
@@ -546,14 +547,20 @@ function calculate_x_movement()
 
 end
 
+-- this function cycles through Mabel's sprites
+-- every 3rd frame (in player.movecount % player.sprite_speed == 0)
 function animate_player(movement)
+
+	-- when we aren't moving, choose static sprite
 	if (abs(movement) < 0.5) then
 		player.sprite = 8
+	-- when moving
 	elseif abs(movement)>0 then
 		player.movecount += 1
 
-		if (player.movecount % 3 == 0) then
+		if (player.movecount % player.sprite_speed == 0) then
 			player.sprite += 1
+			-- sets back to first sprite to loop
 			if(player.sprite > 7) player.sprite = 2
 		end
 	end
@@ -583,18 +590,8 @@ function move_player()
 	player.x += x_move
 	player.y += y_move
 
+	-- this places the need for sprite choosing
 	animate_player(x_move)
-
-	-- if (abs(x_move) < 0.5) then
-	-- 	player.sprite = 8
-	-- elseif abs(x_move)>0 then
-	-- 	player.movecount += 1
-	--
-	-- 	if (player.movecount % 3 == 0) then
-	-- 		player.sprite += 1
-	-- 		if(player.sprite > 7) player.sprite = 2
-	-- 	end
-	-- end
 
 	if(player.x-camx<(64-allowance)) then
 		if camx<=0 then

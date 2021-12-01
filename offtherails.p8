@@ -1097,7 +1097,6 @@ function level3draw()
  drawclouds() 
  map(67, 0, 0, 0, 50*8, 9*8)
  _drawmapsprites()
- _moveextra()
  if player.lives>0 then
 		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
 	end

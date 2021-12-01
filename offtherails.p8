@@ -204,7 +204,7 @@ end
 
 function create_soldier(x, y)
 	-- type of enemy, sprite, x start, y start, health, fire rate
-	create_enemy("soldier", 16, x, y, 5, 50)
+	create_enemy("soldier", 16, x, y, 10, 50)
 end
 
 function create_bames(newx, newy)
@@ -221,18 +221,20 @@ function create_bames(newx, newy)
 	add(enemies, actor)
 end
 
-function create_herlock(newx, newy)
-	local actor = {
-		movecount=0,
-		flipx=false,
-		shootcount=0,
-		health=20,
-		sprite=26,
-		x = newx,
-		y = newy
-	}
+function create_herlock(x, y)
+	-- local actor = {
+	-- 	movecount=0,
+	-- 	flipx=false,
+	-- 	shootcount=0,
+	-- 	health=20,
+	-- 	sprite=26,
+	-- 	x = newx,
+	-- 	y = newy
+	-- }
 
-	add(enemies, actor)
+	create_enemy("herlock", 26, x, y, 20, 30)
+
+	--add(enemies, actor)
 end
 
 function flip_switch(right_tile, left_tile)
@@ -305,6 +307,35 @@ function animate_soldier(soldier)
 		end
 end
 
+function move_herlock(herlock)
+
+	herlock_height = check_jump_height(herlock)
+
+	dx_to_player = player.x - herlock.x
+	dy_to_player = player.y - herlock.y
+
+	if (dx_to_player > 0) herlock.x += 0.5
+	if (dx_to_player < 0) herlock.x -= 0.5
+	
+	-- if herlock.sprite>=26 and herlock.sprite <=30 then
+	-- 		if player.x < herlock.x then
+	-- 			 if not(tile_left_collidable) then
+	-- 					herlock.x -= 0.5 -- move towards
+	-- 					herlock.flipx = true
+	-- 				end
+	-- 		else
+	-- 			if not(tile_right_collidable) then
+	-- 				herlock.x += 0.5 -- move towards
+	-- 				herlock.flipx = false
+	-- 			end
+	-- 		end
+	--
+	-- 		if not(tile_below_collidable) then
+	-- 			herlock.y += player.gravity
+	-- 		end
+	-- 	end
+end
+
 function moving_actors()
 	for actor in all(enemies) do
 		local tile_below = mget((actor.x)/ 8+map_x, (actor.y + 7) / 8)
@@ -322,6 +353,11 @@ function moving_actors()
 		if actor.type == "soldier" then
 			move_soldier(actor)
 			animate_soldier(actor)
+		end
+
+		if actor.type == "herlock" then
+			move_herlock(actor)
+			--animate_herlock(actor)
 		end
 	end
 		-- if the enemy is a soldier
@@ -391,13 +427,13 @@ function moving_actors()
 	-- end
 end
 
-function check_jump_height(x, y)
+function check_jump_height(actor)
 	-- i starts at 8 because you want to start checking
 	-- for collision one 8x8 block below the character.
 	-- 8 < 24 will check two blocks below the character
  for i=8, 15, 1 do
  	for j=0, 7, 1 do
- 		local tile = mget((player.x + j) / 8 + map_x, (player.y + i) / 8)
+ 		local tile = mget((actor.x + j) / 8 + map_x, (actor.y + i) / 8)
 
  		if (fget(tile, 0)) then
  			return (i-8)
@@ -432,7 +468,7 @@ end
 function calculate_y_movement()
 
 	local ceiling_height = check_ceiling_height()
-	local jump_height = check_jump_height()
+	local jump_height = check_jump_height(player)
 
 	if (jump_height == 0) player.is_standing = true
 	if (jump_height > 0) player.is_standing = false
@@ -617,7 +653,7 @@ function move_player()
  		mset(player.x/8+map_x, player.y/8, 179)
  		mset(player.x/8+map_x, (player.y-8)/8, 163)
  	end
- 	if tile_character_on ==61 or tile_character_on == 179 then
+ 	if tile_character_on == 61 or tile_character_on == 179 then
  		level+=1
  		sfx(03)
  		if (level==2) then
@@ -890,8 +926,8 @@ function _draw()
 		pausedraw()
 	end
 
-	print(ledge_dist_right, 100, 100)
-	print(ledge_dist_left, 100, 110)
+	print(dx_to_player, 100, 100)
+	print(dy_to_player, 100, 110)
 end
 
 function gamedraw()
@@ -1576,4 +1612,3 @@ __music__
 00 00424344
 00 00424344
 00 00424344
-

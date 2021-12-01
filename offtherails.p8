@@ -346,15 +346,9 @@ function moving_soldier()
 	end
 	
 	--wizard movement
-<<<<<<< HEAD
-	--if actor.sprite >= 98 or actor.sprite <= 99 then
-
-	--end
-=======
 --	if actor.sprite >= 98 or actor.sprite <= 99 then
 
 --	end
->>>>>>> dfd676da852b727c2467c4a7b9efe2795f1425ca
 	
 end
 

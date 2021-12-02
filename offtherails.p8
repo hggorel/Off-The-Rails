@@ -190,6 +190,7 @@ function create_enemy(type, sprite, x, y, health, firerate)
 		is_standing = true,
 		x=x,
 		y=y,
+		jump_force=3,
 		dy=0.0,
 		dx=0.0,
 		dy_max = 3,
@@ -309,31 +310,57 @@ end
 
 function move_herlock(herlock)
 
-	herlock_height = check_jump_height(herlock)
+	local herlock_height = check_jump_height(herlock)
+	local herlock_ceiling = check_ceiling_height(herlock)
+	local left_block = check_collide_left(herlock)
+	local right_block = check_collide_right(herlock)
+
+	if (herlock_height == 0) herlock.is_standing = true
+	if (herlock_height > 0) herlock.is_standing = false
+
+	-- applies gravity every frame
+	if not herlock.is_standing then
+		herlock.dy -= herlock.gravity
+		if (herlock.dy < -3) herlock.dy = -3
+	end
+
+	if (herlock.dy < 0) and (herlock.dy + herlock_height < 0) then
+		herlock.is_standing = true
+		herlock.dy = (-1 * herlock_height)
+	end
 
 	dx_to_player = player.x - herlock.x
-	dy_to_player = player.y - herlock.y
 
-	if (dx_to_player > 0) herlock.x += 0.5
-	if (dx_to_player < 0) herlock.x -= 0.5
+	if(dx_to_player < -4) then
+		herlock.flipx = true
+		if(left_block <= 1 and herlock.is_standing) then
+			herlock.dx = 0
+			herlock.dy = herlock.jump_force
+		else
+			herlock.dx = -0.5
+		end
+	elseif (dx_to_player > 4) then
+		herlock.flipx = false
+		if(right_block <= 1 and herlock.is_standing) then
+			herlock.dx = 0
+			herlock.dy += herlock.jump_force
+		else
+			herlock.dx = 0.5
+		end
+	end
+
+	-- stop herlock from going through the ceiling
+	if (herlock.dy > herlock_ceiling) herlock.dy = herlock_ceiling
+
+	herlock.x += herlock.dx
+	herlock.y += (-1 * herlock.dy)
+
+	herlock.move_count += 1
+
+end
+
+function animate_herlock(herlock)
 	
-	-- if herlock.sprite>=26 and herlock.sprite <=30 then
-	-- 		if player.x < herlock.x then
-	-- 			 if not(tile_left_collidable) then
-	-- 					herlock.x -= 0.5 -- move towards
-	-- 					herlock.flipx = true
-	-- 				end
-	-- 		else
-	-- 			if not(tile_right_collidable) then
-	-- 				herlock.x += 0.5 -- move towards
-	-- 				herlock.flipx = false
-	-- 			end
-	-- 		end
-	--
-	-- 		if not(tile_below_collidable) then
-	-- 			herlock.y += player.gravity
-	-- 		end
-	-- 	end
 end
 
 function moving_actors()
@@ -357,7 +384,10 @@ function moving_actors()
 
 		if actor.type == "herlock" then
 			move_herlock(actor)
-			--animate_herlock(actor)
+			if (actor.move_count % 20 == 0) then
+			 			herlock_shoot(actor.x, actor.y, player.x, player.y)
+			end
+			animate_herlock(actor)
 		end
 	end
 		-- if the enemy is a soldier
@@ -446,13 +476,13 @@ function check_jump_height(actor)
 	return 16
 end
 
-function check_ceiling_height()
+function check_ceiling_height(actor)
 	-- i starts at 0 because you want to start checking
 	-- for collision one 8x8 block above the character.
 	-- 8 < 24 will check two blocks above the character
  for i=1, 15, 1 do
   for j=0, 7, 1 do
-  	local tile = mget((player.x + j) / 8 + map_x, (player.y - i) / 8)
+  	local tile = mget((actor.x + j) / 8 + map_x, (actor.y - i) / 8)
 
 			if (fget(tile, 0)) then
 				return (i - 1)
@@ -467,7 +497,7 @@ end
 
 function calculate_y_movement()
 
-	local ceiling_height = check_ceiling_height()
+	local ceiling_height = check_ceiling_height(player)
 	local jump_height = check_jump_height(player)
 
 	if (jump_height == 0) player.is_standing = true
@@ -926,7 +956,7 @@ function _draw()
 		pausedraw()
 	end
 
-	print(dx_to_player, 100, 100)
+	print(herlock_ceiling, 100, 100)
 	print(dy_to_player, 100, 110)
 end
 
@@ -1332,14 +1362,14 @@ __gfx__
 0aaaa000011111000f2110000f2110000f2110000f2110000f2110000f2110000f411000001f10000f4110000a2a82a044000000440000000f17771f00000000
 009040000f111f0008111800001810000081100008111800001110000011100000111000001515000011100000222200000000004400000001a7711000000000
 0000000000808000000000000080000000008000000000000080000000008000008080000000000000808000077777700000000000000000111711a100000000
-01110000011100000111000001110000011100000044400000444000004440000044400000444000000000000000000000000000000000000044400000000000
-0111000001110000011100000111000001110000004fc000004fc000004fc000004fc000004fc000004440000044400000444000004440000044440000000000
-0111000001110000011100000111000001ff000000fff00000fff00000fff00000fff00000fff0000044440000444400004444000044440004fff06000000000
-01ff000001ff000001ff000001ff000008880000001770550017705500177055001770550017705504fff00004fff00004fff00004fff0600044440000000000
-088800000888455008880000088845500788f55000117f0000117f0000117f0000117f0000117f00004440600044406000444060004444000444400000000000
-078745500784f000078745500784f0000884000000f1100000f1100000f1100000f1100000f11000004444000044440000444400004440000101000000000000
-0884f000188800000881f00001880000101000000010100000101000051010000010100005151000004440000144400001444000004440000000000000000000
-01010000001000000100000000010000000000000050500005050000000050000505000000000000001010000001000000001000000101000000000000000000
+01110000011100000111000001110000011100000044400000444000004440000044400000444000000000000000000000000000000000000000000000000000
+0111000001110000011100000111000001110000004fc000004fc000004fc000004fc000004fc000004440000044400000444000004440000044400000000000
+0111000001110000011100000111000001ff000000fff00000fff00000fff00000fff00000fff000004444000044440000444400004444000044440000000000
+01ff000001ff000001ff000001ff000008880000001770550017705500177055001770550017705504fff00004fff00004fff00004fff06004fff06000000000
+088800000888455008880000088845500788f55000117f0000117f0000117f0000117f0000117f00004440600044406000444060004444000044440000000000
+078745500784f000078745500784f0000884000000f1100000f1100000f1100000f1100000f11000004444000044440000444400004440000044400000000000
+0884f000188800000881f00001880000101000000010100000101000051010000010100005151000004440000144400000414000014440000041400000000000
+01010000001000000100000000010000000000000050500005050000000050000505000000000000001010000001000000100000000100000000000000000000
 88888888333333333333333300888888888118888888228888880033b33333333333300000000022000080004444444434444443344444433333333300000000
 aaaaaaaa3366666666666633008cddd6888118dcc6d88cdcccc8003ccc6633bdccdc300000000022000cc0004433334445666654456666543366663300000000
 a999999a360000000000006300cccdd6888008c6cddc86dcccc8003c6dccc33ccd66300000000022000cc0004344443446333364463333643600006300000000

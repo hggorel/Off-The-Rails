@@ -638,7 +638,7 @@ function animate_player(movement)
 
 	-- when we aren't moving, choose static sprite
 	if (abs(movement) < 0.5) then
-		player.sprite = 8
+		player.sprite = 6
 	-- when moving
 	elseif abs(movement)>0 then
 		player.movecount += 1
@@ -646,7 +646,7 @@ function animate_player(movement)
 		if (player.movecount % player.sprite_speed == 0) then
 			player.sprite += 1
 			-- sets back to first sprite to loop
-			if(player.sprite > 7) player.sprite = 2
+			if(player.sprite > 5) player.sprite = 2
 		end
 	end
 end

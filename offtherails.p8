@@ -14,7 +14,7 @@ function _init()
 	if mode == 0 then
 		titleupdate()
 	end
-	
+
 	--figure out music funtions
 	--better
 	music(0)
@@ -37,6 +37,7 @@ function _init()
 	player ={
 		movecount=1,
 		sprite = 1,
+		sprite_speed = 3,
 		health = 50,
 		lives=3,
 		x = 32,
@@ -95,7 +96,7 @@ function _init()
 	camx=0
 
 	danger = {}
-	bullets = {}	
+	bullets = {}
 
 	map_x=0
 	map_speed=1
@@ -379,7 +380,7 @@ function move_herlock(herlock)
 end
 
 function animate_herlock(herlock)
-	
+
 end
 
 function moving_actors()
@@ -686,7 +687,7 @@ function moving_soldier()
 				basic_shoot(actor.x, actor.y, actor.flipx)
 			end
 			actor.shootcount+=1
-		
+
 
 		-- if the enemy is bames jond
 		-- bames' bullets will shoot directly at
@@ -709,7 +710,7 @@ function moving_soldier()
 					actor.x += 0.5 -- move towards
 					actor.flipx = false
 				end
-			end	
+			end
 
 			if actor.movecount < 20 and actor.movecount/5 ==0 then
 				--actor.y+=1
@@ -726,12 +727,12 @@ function moving_soldier()
 			actor.shootcount+=1
 		end
 	end
-	
+
 	--wizard movement
 --	if actor.sprite >= 98 or actor.sprite <= 99 then
 
 --	end
-	
+
 end
 
 
@@ -764,7 +765,7 @@ function check_ceiling_height()
 			if (fget(tile, 0)) then
 				return (i - 1)
 			end
-			
+
 		end
 	end
  -- 16 indicates that we are at least two blocks away
@@ -894,7 +895,7 @@ end
 
 --]]
 
- 		
+
 function move_player()
 
 	local allowance=14
@@ -911,23 +912,24 @@ function move_player()
 	local tile_left_collidable = fget(tile_left_character, 0)
 	flip_switch(tile_right_character, tile_left_character)
 	grab_suitcase(tile_left_character)
-	
+
 	x_move = calculate_x_movement()
 	y_move = calculate_y_movement()
 	local speed = abs(player.dx)
 	player.x += x_move
 	player.y += y_move
-	
-	if abs(x_move)>0 then
-			-- switching to see animation
-		if player.movecount==3 then
-			player.movecount=1
-		end
-		if player.movecount<3 then
-			player.movecount+=1
-		end
-		player.sprite =1+player.movecount
-	end
+
+	animate_player(x_move)
+	-- if abs(x_move)>0 then
+	-- 		-- switching to see animation
+	-- 	if player.movecount==3 then
+	-- 		player.movecount=1
+	-- 	end
+	-- 	if player.movecount<3 then
+	-- 		player.movecount+=1
+	-- 	end
+	-- 	player.sprite =1+player.movecount
+	-- end
 
 	if(player.x-camx<(64-allowance)) then
 		if camx<=0 then
@@ -980,7 +982,7 @@ function move_player()
 				player.x=176
 				player.y=72
 			end
-			
+
 			if level == 3 then
 				for e in all(enemies) do
 					del(enemies, e)
@@ -991,13 +993,13 @@ function move_player()
 				player.x = 150
 				player.y = 64
 			end
-			
+
 			if level == 4 then
 				gamewin = true
 			end
-			
+
  	end
- 	
+
  	if tile_character_on ==57 then
  		mset(player.x/8, player.y/8, 58)
  		mset(23, 7, 50)
@@ -1033,11 +1035,11 @@ function _update()
 	else
 		pauseupdate()
 	end
-	--colorblind settings? 
-	
+	--colorblind settings?
+
 	--gameplay mode updates
 	if mode == 1 then
-	
+
 	local player_right_character = mget((player.x +8)/8 + map_x, player.y/8)
 	local player_right_collidable = fget(player_right_character, 0)
 
@@ -1057,10 +1059,10 @@ function _update()
 
 		local tile_left = mget((b.x)/8 + map_x, b.y/8)
 		local tile_left_collidable = fget(tile_left, 0)
-		
+
 		b.x+=b.dx
 		b.y+=b.dy
-		
+
 		if b.dx < 0 and tile_left_collidable then
 			del(bullets, b)
 		elseif b.dx > 0 and tile_right_collidable then
@@ -1070,7 +1072,7 @@ function _update()
 		elseif b.dy > 0 and tile_below_collidable then
 			del(bullets, b)
 		end
-		
+
 		if b.x<camx-128 or b.x > camx+128 or b.y < 0 or b.y>128 then
 			del(bullets, b)
 		end
@@ -1088,10 +1090,10 @@ function _update()
 
 		local tile_left = mget((e.x)/8 + map_x, e.y/8)
 		local tile_left_collidable = fget(tile_left, 0)
-		
+
 		e.x+=e.dx
 		e.y+=e.dy
-		
+
 		if e.dx < 0 and tile_left_collidable then
 			del(danger, e)
 		elseif e.dx > 0 and tile_right_collidable then
@@ -1101,7 +1103,7 @@ function _update()
 		elseif e.dy > 0 and tile_below_collidable then
 			del(danger, e)
 		end
-		
+
 		if e.x<camx-128 or e.x>camx+128 or e.y<0 or e.y>128 then
 			del(danger, e)
 		end
@@ -1253,12 +1255,12 @@ function _draw()
 	else
 		pausedraw()
 	end
-	
+
 
 end
 
 
-	
+
 function gamedraw()
 	--will need to readjust levels for tutorial map
 	if level==0 and levelwin==false and gameover==false then
@@ -1266,7 +1268,7 @@ function gamedraw()
  	camera(camx, -20)
  	map_x = 110
  	drawclouds()
- 	
+
  		if colblind == 1 then
  	pal(3,130,1)--check this
  	pal(11,137,1)
@@ -1274,9 +1276,9 @@ function gamedraw()
  	if colblind == 0 then
  	pal()
  	end
- 	
+
  	tutorialmap()
- 	
+
  	if player.lives>0 then
 			spr(player.sprite, player.x, player.y+8, 1, 1, player.flipx, false)
 		end
@@ -1286,9 +1288,9 @@ function gamedraw()
 		print('health', 1, 1, 6)
 		rectfill(1,8, player.health,9,8)
 		print('lives', 40, 1, 6)
- 	
+
 	end
-	
+
 	if level==1 and levelwin==false and gameover==false then
  	cls(5)
  	camera(camx, -16)
@@ -1306,7 +1308,7 @@ function gamedraw()
  	if colblind == 0 then
  	pal()
  	end
- 	
+
  	map(0, 0, 0, 0, 32*8, 9*8)
  	_drawmapsprites()
  	_moveextra()
@@ -1348,16 +1350,16 @@ function gamedraw()
 	if level == 2 and gameover == false then
 		level2draw()
 	end
-	
+
 	if level == 3 and gameover == false then
 		level3draw()
 	end
-	
+
 	if gamewin then
 		cls(1)
 		_winscreen()
 	end
-	
+
 end
 
 function _winscreen()
@@ -1393,8 +1395,8 @@ function _drawmapsprites()
 		if level == 1 then
 		spr(41,04*8,08*8,1,1,true,false)
 		spr(41,07*8,08*8) --booths
-		spr(41,11*8,08*8,1,1,true,false) 
-		spr(41,14*8,08*8) 
+		spr(41,11*8,08*8,1,1,true,false)
+		spr(41,14*8,08*8)
 		spr(41,18*8,08*8,1,1,true,false)
 		spr(41,21*8,08*8)
 		end
@@ -1487,7 +1489,7 @@ function pausedraw()
 end
 
 --for inventory
-function equip(truth) 
+function equip(truth)
 	if mode == 2 and truth and btnp(🅾️) then
 		--we'll have to have multiple gun types coded before i do anything here
 	end
@@ -1513,7 +1515,7 @@ function level2draw()
 	cls(0)
  camera(camx, -16)
  pal(13,134,1)
- drawclouds() 
+ drawclouds()
  map(36, 0, 0, 0, 32*8, 9*8)
  _drawmapsprites()
  _moveextra()
@@ -1521,7 +1523,7 @@ function level2draw()
 	if player.lives>0 then
 		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
 	end
-		
+
 	for e in all(enemies) do
 		spr(e.sprite, e.x, e.y, 1, 1, e.flipx, false)
 	end
@@ -1545,13 +1547,13 @@ function level3draw()
 	cls(0)
  camera(camx, -16)
  pal(13,134,1)
- drawclouds() 
+ drawclouds()
  map(67, 0, 0, 0, 50*8, 9*8)
  _drawmapsprites()
  if player.lives>0 then
 		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
 	end
-		
+
 	for e in all(enemies) do
 		spr(e.sprite, e.x, e.y, 1, 1, e.flipx, false)
 	end
@@ -1593,7 +1595,7 @@ function setting()
 	print("press ⬇️ to interact",17,60,7)
 	print("press x for inventory", 15,70,7)
 	print("...and still x to start", 15,80,7)
-	
+
 end
 
 function colorflip()
@@ -1631,7 +1633,7 @@ function _moveextra()
 
 		end
 		--dx needs to be added
-		
+
 		--this could be super improved
 		if extra.movecount < 10 then
 		 extra.x += 2/extra.dx
@@ -1712,8 +1714,8 @@ end
 
 function drawcutscene()
 	cls()
-	
-	
+
+
 	text1()
 	text2()
 	text3()
@@ -1724,9 +1726,9 @@ function text1()
 	print("north england, 196x")
 	--bottom of screen
 	print("press ➡️ to continue",40,100,0)
-	
-		
-		if cc == 1 then	
+
+
+		if cc == 1 then
 		print(".",4,5,7)
 		end
 		if cc == 2 then
@@ -1735,7 +1737,7 @@ function text1()
 		if  cc == 3 then
 		print(". . .",4,5,7)
 		end
-	
+
 end
 
 function text2()
@@ -1775,7 +1777,7 @@ function text3()
 	end
 	if cc > 12 then
 	spr(12,70,75)
-	end	
+	end
 	if cc == 14 then --test this
 	cls()
 	mode = 1
@@ -1804,7 +1806,7 @@ print("and welcome to train twm sion cati",0,0,7)
 print("on trains, people use 'arrow keys' to move",0,0,7)
 end
 --second box
-if site == 116*8 and below == 11*8 then 
+if site == 116*8 and below == 11*8 then
 print("trains tend to be passennger or cargo trains",0,0,7)
 print("this one happens to be a passenger train",0,0,7)
 print("so you'll see some other passengers--let them be",0,0,7)
@@ -1846,18 +1848,18 @@ end
 
 --formatting for printing tutorial etc?
 function txtbox()
- 
+
 end
 
 __gfx__
-00000000008888800088880000888800008888000088880000888800008888000088888000888880008888000000a00000000000000000000000000000000000
-0000000008fff88000f8888000f8888000f8888000f8888000f8888000f8888008fff88008fff88008fff880000aa00000000000000000000000000000000000
-0aaa0000083f388000f3888000f3888800f3888800f38880003f888800f38888883f3888083f3888083f388000aaaa0001555555015555500060606000000000
-0a9aaa0008fff88000ff888000ff888800ff888800ff888000ff888800ff8888f8fff8f8088ff458f8fff8f002272220041111500411150009a9a99000000000
-0aaaa0000111118052111880521118805211180054111880541118805411180011111110008141f0011111100a8aa8a0445000004450000009a9a9a000000000
-0aaaa000011111000f2110000f2110000f2110000f4110000f4110000f41100000111000001f1000081118800a2a82a0440000004400000009a9a8a000000000
-009040000f101f000010150000101000001510000010150000101000001510000015150000151500001110450022220000000000440000000999888000000000
-00000000005050000050000000505000000050000050000000505000000050000000000000000000051514000777777000000000000000000000080000000000
+00000000008888800088880000888800008888000088880000888800008888000088880000888880008888000000a00000000000000000000000000000000000
+0000000008fff88000f8888000f8888000f8888000f8888000f8888000f8888000f8888008fff88008fff880000aa00000000000000000000000000000000000
+0aaa0000083f388000f3888800f3888800f3888800f3888800f3888000f3888800f38880083f3888083f388000aaaa0001555555015555500060606000000000
+0a9aaa0008fff88000ff888000ff888000ff888000ff888000ff888000ff888000ff8880088ff458f8fff8f002272220041111500411150009a9a99000000000
+0aaaa0000111118054111000541110005411100054111000541118805211100054111880008141f0011111100a8aa8a0445000004450000009a9a9a000000000
+0aaaa000011111000f4110000f4110000f4110000f4110000f4110000f2110000f411000001f1000081118800a2a82a0440000004400000009a9a8a000000000
+009040000f111f000811180000181000008110000811180000111000001110000011100000151500001110450022220000000000440000000999888000000000
+00000000008080000000000000800000000080000000000000808000000080000080800000000000051514000777777000000000000000000000080000000000
 01110000001110000011100000111000011100000044400000444000004440000044400000444000000000000000000000000000000000000044400000000000
 0111000000111000001110000011100001110000004fc000004fc000004fc000004fc000004fc000004440000044400000444000004440000044440000000000
 0111000000111000001110000011100001ff000000fff00000fff00000fff00000fff00000fff0000044440000444400004444000044440004fff06000000000
@@ -2145,4 +2147,3 @@ __music__
 00 00424344
 00 00424344
 00 00424344
-

@@ -182,18 +182,34 @@ function herlock_shoot(startx, starty, targetx, targety)
 
 end
 
-function create_soldier(newx, newy)
-	local actor ={
-		movecount=0,
-		flipx=false,
-		shootcount=0,
-		health = 5,
-		sprite = 16,
-		x = newx,
-		y = newy
+function create_enemy(type, sprite, x, y, health, firerate)
+	local actor = {
+		type = type,
+		sprite = sprite,
+		move_count = 0,
+		shoot_count = 0,
+		firerate = firerate,
+		health = health,
+		flipx = false,
+		is_standing = true,
+		x=x,
+		y=y,
+		jump_force=3,
+		dy=0.0,
+		dx=0.0,
+		dy_max = 3,
+		dx_max = 1,
+		gravity=0.3,
+		air_resistance = 0.8,
+		friction = 0.5
 	}
 
 	add(enemies, actor)
+end
+
+function create_soldier(x, y)
+	-- type of enemy, sprite, x start, y start, health, fire rate
+	create_enemy("soldier", 16, x, y, 10, 50)
 end
 
 function create_bames(newx, newy)
@@ -210,20 +226,9 @@ function create_bames(newx, newy)
 	add(enemies, actor)
 end
 
-function create_herlock(newx, newy)
-	local actor = {
-		movecount=0,
-		flipx=false,
-		shootcount=0,
-		health=20,
-		sprite=26,
-		x = newx,
-		y = newy
-	}
-
-	add(enemies, actor)
+function create_herlock(x, y)
+	create_enemy("herlock", 26, x, y, 20, 30)
 end
-
 
 --adding a wizard function
 function create_merlin(newx, newy)
@@ -265,12 +270,393 @@ function grab_suitcase(tile_on)
 	end
 end
 
+function check_ledge_left(actor)
+
+	for i=1, 2, 1 do
+		local tile = mget((actor.x - i) / 8 + map_x, (actor.y + 8) / 8)
+
+		if(not fget(tile, 0)) return i
+	end
+
+	return 3
+
+end
+
+function check_ledge_right(actor)
+
+	for i=8, 9, 1 do
+		local tile = mget((actor.x + i) / 8 + map_x, (actor.y + 8) / 8)
+
+		if(not fget(tile, 0)) return (i - 7)
+	end
+
+	return 3
+
+end
+
+
+function move_soldier(soldier)
+
+	local distance_right = check_collide_right(soldier)
+	local distance_left = check_collide_left(soldier)
+
+	-- ledge detection to switch actor direction
+	ledge_dist_left = check_ledge_left(soldier)
+	ledge_dist_right = check_ledge_right(soldier)
+
+	if(soldier.flipx and (distance_left < 1 or ledge_dist_left < 2)) soldier.flipx = false
+	if(not soldier.flipx and (distance_right < 1 or ledge_dist_right < 2)) soldier.flipx = true
+
+	if(soldier.flipx and distance_left >= 1) soldier.x -= 0.5
+	if(not soldier.flipx and distance_right >= 1) soldier.x += 0.5
+
+	if soldier.shoot_count % soldier.firerate == 0 then
+	 basic_shoot(soldier.x, soldier.y, soldier.flipx)
+	end
+
+	soldier.shoot_count += 1
+
+end
+
+function animate_soldier(soldier)
+		soldier.move_count += 1
+
+		if (soldier.move_count % 3 == 0) then
+			soldier.sprite += 1
+			if(soldier.sprite > 19) soldier.sprite = 16
+		end
+end
+
+function move_herlock(herlock)
+
+	local herlock_height = check_jump_height(herlock)
+	local herlock_ceiling = check_ceiling_height(herlock)
+	local left_block = check_collide_left(herlock)
+	local right_block = check_collide_right(herlock)
+
+	if (herlock_height == 0) herlock.is_standing = true
+	if (herlock_height > 0) herlock.is_standing = false
+
+	-- applies gravity every frame
+	if not herlock.is_standing then
+		herlock.dy -= herlock.gravity
+		if (herlock.dy < -3) herlock.dy = -3
+	end
+
+	if (herlock.dy < 0) and (herlock.dy + herlock_height < 0) then
+		herlock.is_standing = true
+		herlock.dy = (-1 * herlock_height)
+	end
+
+	dx_to_player = player.x - herlock.x
+
+	if(dx_to_player < -4) then
+		herlock.flipx = true
+		if(left_block <= 1 and herlock.is_standing) then
+			herlock.dx = 0
+			herlock.dy = herlock.jump_force
+		else
+			herlock.dx = -0.5
+		end
+	elseif (dx_to_player > 4) then
+		herlock.flipx = false
+		if(right_block <= 1 and herlock.is_standing) then
+			herlock.dx = 0
+			herlock.dy += herlock.jump_force
+		else
+			herlock.dx = 0.5
+		end
+	end
+
+	-- stop herlock from going through the ceiling
+	if (herlock.dy > herlock_ceiling) herlock.dy = herlock_ceiling
+
+	herlock.x += herlock.dx
+	herlock.y += (-1 * herlock.dy)
+
+	herlock.move_count += 1
+
+end
+
+function animate_herlock(herlock)
+	
+end
+
+function moving_actors()
+	for actor in all(enemies) do
+		local tile_below = mget((actor.x)/ 8+map_x, (actor.y + 7) / 8)
+ 	local tile_below_collidable = fget(tile_below, 0)
+
+		local tile_above = mget((actor.x) / 8+map_x, (actor.y-1) / 8)
+ 	local tile_above_collidable = fget(tile_above, 0)
+
+		local tile_right = mget((actor.x +7)/8+ map_x, actor.y/8)
+		local tile_right_collidable = fget(tile_right, 0)
+
+		local tile_left = mget((actor.x)/8+ map_x, actor.y/8)
+		local tile_left_collidable = fget(tile_left, 0)
+
+		if actor.type == "soldier" then
+			move_soldier(actor)
+			animate_soldier(actor)
+		end
+
+		if actor.type == "herlock" then
+			move_herlock(actor)
+			if (actor.move_count % 20 == 0) then
+			 			herlock_shoot(actor.x, actor.y, player.x, player.y)
+			end
+			animate_herlock(actor)
+		end
+	end
+		-- if the enemy is a soldier
+	-- 	if actor.sprite <=20 and actor.sprite >=16 then
+	-- 		if actor.movecount<5 then
+	-- 			actor.x+=1
+	-- 			actor.flipx=false
+	-- 		end
+	-- 		if actor.movecount>5 then
+	-- 			actor.flipx=true
+	-- 			actor.x-=1
+	-- 		end
+	--
+	-- 		if actor.movecount<10 then
+	-- 			actor.movecount+=1
+	-- 		else
+	-- 			actor.movecount=0
+	-- 		end
+	--
+	-- 		if actor.shootcount%20==0 then
+	-- 			basic_shoot(actor.x, actor.y, actor.flipx)
+	-- 		end
+	-- 		actor.shootcount+=1
+	-- 	end
+	--
+	-- 	-- if the enemy is bames jond
+	-- 	-- bames' bullets will shoot directly at
+	-- 	-- our hero, even if not striaght
+	-- 	if actor.sprite>=21 and actor.sprite <=25 then
+	-- 		actor.x+=1
+	-- 	end
+	--
+	-- 	-- if the enemy is herlock sholmes
+	-- 	-- we want herlock to track him down
+	-- 	if actor.sprite>=26 and actor.sprite <=30 then
+	-- 		if player.x < actor.x then
+	-- 			 if not(tile_left_collidable) then
+	-- 					actor.x -= 0.5 -- move towards
+	-- 					actor.flipx = true
+	-- 				end
+	-- 		else
+	-- 			if not(tile_right_collidable) then
+	-- 				actor.x += 0.5 -- move towards
+	-- 				actor.flipx = false
+	-- 			end
+	-- 		end
+	--
+	-- 		if not(tile_below_collidable) then
+	-- 			actor.y += player.gravity
+	-- 		end
+	--
+	-- 		if actor.movecount < 20 and actor.movecount/5 ==0 then
+	-- 			--actor.y+=1
+	-- 			actor.movecount += 1
+	-- 			actor.sprite += 1
+	-- 		else
+	-- 			actor.sprite = 26
+	-- 			actor.movecount=0
+	-- 		end
+	--
+	-- 		if actor.shootcount%20 == 0 then
+	-- 			herlock_shoot(actor.x, actor.y, player.x, player.y)
+	-- 		end
+	-- 		actor.shootcount+=1
+	-- 	end
+	--
+	-- end
+end
+
+function check_jump_height(actor)
+	-- i starts at 8 because you want to start checking
+	-- for collision one 8x8 block below the character.
+	-- 8 < 24 will check two blocks below the character
+ for i=8, 15, 1 do
+ 	for j=0, 7, 1 do
+ 		local tile = mget((actor.x + j) / 8 + map_x, (actor.y + i) / 8)
+
+ 		if (fget(tile, 0)) then
+ 			return (i-8)
+ 		end
+ 	end
+ end
+	-- -1 indicates that height can not be detected because
+	-- height only detects two blocks below
+	-- so we must be higher than two blocks
+	return 16
+end
+
+function check_ceiling_height(actor)
+	-- i starts at 0 because you want to start checking
+	-- for collision one 8x8 block above the character.
+	-- 8 < 24 will check two blocks above the character
+ for i=1, 15, 1 do
+  for j=0, 7, 1 do
+  	local tile = mget((actor.x + j) / 8 + map_x, (actor.y - i) / 8)
+
+			if (fget(tile, 0)) then
+				return (i - 1)
+			end
+
+		end
+	end
+ -- 16 indicates that we are at least two blocks away
+	return 16
+
+end
+
+function calculate_y_movement()
+
+	local ceiling_height = check_ceiling_height(player)
+	local jump_height = check_jump_height(player)
+
+	if (jump_height == 0) player.is_standing = true
+	if (jump_height > 0) player.is_standing = false
+
+	-- applies gravity every frame
+	if not player.is_standing then
+		player.dy -= player.gravity
+		if (player.dy < -3) player.dy = -3
+	end
+
+	-- if we are falling past the floor,
+	-- fix it by changing dy to the height from the floor
+	-- so we get sucked to the ground instead
+	if (player.dy < 0) and (player.dy + jump_height < 0) then
+		player.is_standing = true
+		player.dy = (-1 * jump_height)
+	end
+
+	if(player.dy > 0) and (player.dy - ceiling_height > 0) then
+		player.dy = (-1 * ceiling_height)
+	end
+
+	-- when the player lets go, and we are moving up
+	-- then we fraction vertical velocity to start falling sooner
+	if (not btn(2) and not player.is_standing and player.dy > 0) player.dy *= 0.5
+
+ -- jump is pressed, jump up
+	if btnp(2) and player.is_standing then
+		player.dy += player.jump_force
+		player.is_standing = false
+	end
+
+	-- make dy negative because positive dy moves character downward
+ return (-1 * player.dy)
+end
+
+function check_collide_left(actor)
+
+	for i=1, 8, 1 do
+		for j=0, 7, 1 do
+			local tile = mget((actor.x - i) / 8 + map_x, (actor.y + j) / 8)
+
+			if (fget(tile, 0)) return (i - 1)
+		end
+	end
+ -- 9 indicates we are at least 1 block away
+	return 9
+
+end
+
+function check_collide_right(actor)
+
+ for i=0, 7, 1 do
+  for j=8, 15, 1 do
+			local tile = mget((actor.x + j) / 8 + map_x, (actor.y + i) / 8)
+
+			if (fget(tile, 0)) return (j - 8)
+		end
+	end
+ -- 9 indicates we are at least 1 block away
+	return 9
+
+end
+
+function calculate_x_movement()
+
+	local collide_distance_right = check_collide_right(player)
+	local collide_distance_left = check_collide_left(player)
+
+	-- if we arent moving left or right,
+	-- slow down the player if they are in the air
+	if(not btn(1) and not btn(0) and not player.is_standing) then
+	 player.dx *= player.air_resistance
+	end
+	-- if we are standing instead of in the air, friction is greater
+ if(not btn(1) and not btn(0) and player.is_standing) then
+		player.dx *= player.friction
+	end
+
+	-- move right, increases until we reach max speed
+	if btn(1) then
+		player.flipx = true
+		player.dx += player.run_force
+		if (player.dx > player.dx_max) player.dx = player.dx_max
+	end
+
+	-- move left, decreases until we reach minimum speed
+	-- (-1 * player.dx_max is just the negative direction maximum)
+	if btn(0) then
+		player.flipx = false
+		player.dx -= player.run_force
+		if (player.dx < (-1 * player.dx_max)) player.dx = (-1 * player.dx_max)
+	end
+
+	if (player.dx > 0) then
+		-- snaps movement right to the wall
+		-- keep collide_distance_right positive because we are moving right
+		if(player.dx - collide_distance_right > 0) player.dx = collide_distance_right
+	end
+
+	temp_dx = player.dx
+
+	if (btn(0) and player.dx < 0) then
+		-- snaps movement left to the wall
+		-- make collide_distance_left negative cause we are moving left
+		if (player.dx + collide_distance_left < 0) then
+			player.dx = (-1 * collide_distance_left)
+		end
+ end
+
+	return player.dx
+
+end
+
+-- this function cycles through mabel's sprites
+-- every 3rd frame (in player.movecount % player.sprite_speed == 0)
+function animate_player(movement)
+
+	-- when we aren't moving, choose static sprite
+	if (abs(movement) < 0.5) then
+		player.sprite = 8
+	-- when moving
+	elseif abs(movement)>0 then
+		player.movecount += 1
+
+		if (player.movecount % player.sprite_speed == 0) then
+			player.sprite += 1
+			-- sets back to first sprite to loop
+			if(player.sprite > 7) player.sprite = 2
+		end
+	end
+end
+
+--[[
 function moving_soldier()
 	for actor in all(enemies) do
 		local tile_below = mget((actor.x)/ 8+map_x, (actor.y + 8) / 8)
  	local tile_below_collidable = fget(tile_below, 0)
-
-		local tile_above = mget((actor.x) / 8+map_x, (actor.y-8) / 8)
+ 	local tile_above = mget((actor.x) / 8+map_x, (actor.y-8) / 8)
  	local tile_above_collidable = fget(tile_above, 0)
 
 		local tile_right = mget((actor.x +8)/8+ map_x, actor.y/8)
@@ -348,6 +734,7 @@ function moving_soldier()
 	
 end
 
+
 function check_jump_height(x, y)
 	-- i starts at 8 because you want to start checking
 	-- for collision one 8x8 block below the character.
@@ -384,6 +771,7 @@ function check_ceiling_height()
 	return 16
 
 end
+
 
 function calculate_y_movement()
 
@@ -438,6 +826,7 @@ function check_collide_left()
 	return 9
 
 end
+
 
 function check_collide_right()
 
@@ -502,6 +891,8 @@ function calculate_x_movement()
 	return player.dx
 
 end
+
+--]]
 
  		
 function move_player()
@@ -722,7 +1113,7 @@ function _update()
 
 	move_player()
 
-	moving_soldier()
+	moving_actors()
 
 	-- removing enemies that have been shot
 	for e in all(enemies) do

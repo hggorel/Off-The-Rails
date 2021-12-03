@@ -360,7 +360,7 @@ function move_herlock(herlock)
 end
 
 function animate_herlock(herlock)
-	
+
 end
 
 function moving_actors()

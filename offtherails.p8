@@ -14,7 +14,7 @@ function _init()
 	if mode == 0 then
 		titleupdate()
 	end
-	
+
 	--figure out music funtions
 	--better
 	music(0)
@@ -78,24 +78,12 @@ function _init()
 
 	--extra people who aren't our
 	--friends but aren't our enemies
-	extra ={
-		x = 4*8,
-		x1 = 10*8,
-		y = 3*8,
-		y1 = 8*8,
-		dx = 2, --speed. not properly implemented yet
-		timing = .15,
-		sprite = 64,
-		spr1 = 66,
-		spr2 = 74,
-		flipx = false,
-		movecount = 0 --movecount format added to match hannah
-	}
+	extras ={}
 
 	camx=0
 
 	danger = {}
-	bullets = {}	
+	bullets = {}
 
 	map_x=0
 	map_speed=1
@@ -240,6 +228,20 @@ function create_merlin(newx, newy)
 	add(enemies, actor)
 end
 
+function create_npc(newx,newy,spri)
+	local extra ={
+		x = newx,
+		y = newy,
+		dx = 2, --speed. not properly implemented yet
+		timing = .15,
+		sprite = spri,
+		flipx = false,
+		movecount = 0 --movecount format added to match hannah
+	}
+	add(extras,extra)
+end
+
+
 function flip_switch(right_tile, left_tile)
 	if right_tile == 136 then
 		mset((player.x+8)/8+map_x, player.y/8, 137)
@@ -300,7 +302,7 @@ function moving_soldier()
 				basic_shoot(actor.x, actor.y, actor.flipx)
 			end
 			actor.shootcount+=1
-		
+
 
 		-- if the enemy is bames jond
 		-- bames' bullets will shoot directly at
@@ -323,7 +325,7 @@ function moving_soldier()
 					actor.x += 0.5 -- move towards
 					actor.flipx = false
 				end
-			end	
+			end
 
 			if actor.movecount < 20 and actor.movecount/5 ==0 then
 				--actor.y+=1
@@ -340,12 +342,12 @@ function moving_soldier()
 			actor.shootcount+=1
 		end
 	end
-	
+
 	--wizard movement
 --	if actor.sprite >= 98 or actor.sprite <= 99 then
 
 --	end
-	
+
 end
 
 function check_jump_height(x, y)
@@ -377,7 +379,7 @@ function check_ceiling_height()
 			if (fget(tile, 0)) then
 				return (i - 1)
 			end
-			
+
 		end
 	end
  -- 16 indicates that we are at least two blocks away
@@ -503,7 +505,7 @@ function calculate_x_movement()
 
 end
 
- 		
+
 function move_player()
 
 	local allowance=14
@@ -520,13 +522,13 @@ function move_player()
 	local tile_left_collidable = fget(tile_left_character, 0)
 	flip_switch(tile_right_character, tile_left_character)
 	grab_suitcase(tile_left_character)
-	
+
 	x_move = calculate_x_movement()
 	y_move = calculate_y_movement()
 	local speed = abs(player.dx)
 	player.x += x_move
 	player.y += y_move
-	
+
 	if abs(x_move)>0 then
 			-- switching to see animation
 		if player.movecount==3 then
@@ -589,7 +591,7 @@ function move_player()
 				player.x=176
 				player.y=72
 			end
-			
+
 			if level == 3 then
 				for e in all(enemies) do
 					del(enemies, e)
@@ -600,13 +602,13 @@ function move_player()
 				player.x = 150
 				player.y = 64
 			end
-			
+
 			if level == 4 then
 				gamewin = true
 			end
-			
+
  	end
- 	
+
  	if tile_character_on ==57 then
  		mset(player.x/8, player.y/8, 58)
  		mset(23, 7, 50)
@@ -642,11 +644,11 @@ function _update()
 	else
 		pauseupdate()
 	end
-	--colorblind settings? 
-	
+	--colorblind settings?
+
 	--gameplay mode updates
 	if mode == 1 then
-	
+
 	local player_right_character = mget((player.x +8)/8 + map_x, player.y/8)
 	local player_right_collidable = fget(player_right_character, 0)
 
@@ -666,10 +668,10 @@ function _update()
 
 		local tile_left = mget((b.x)/8 + map_x, b.y/8)
 		local tile_left_collidable = fget(tile_left, 0)
-		
+
 		b.x+=b.dx
 		b.y+=b.dy
-		
+
 		if b.dx < 0 and tile_left_collidable then
 			del(bullets, b)
 		elseif b.dx > 0 and tile_right_collidable then
@@ -679,7 +681,7 @@ function _update()
 		elseif b.dy > 0 and tile_below_collidable then
 			del(bullets, b)
 		end
-		
+
 		if b.x<camx-128 or b.x > camx+128 or b.y < 0 or b.y>128 then
 			del(bullets, b)
 		end
@@ -697,10 +699,10 @@ function _update()
 
 		local tile_left = mget((e.x)/8 + map_x, e.y/8)
 		local tile_left_collidable = fget(tile_left, 0)
-		
+
 		e.x+=e.dx
 		e.y+=e.dy
-		
+
 		if e.dx < 0 and tile_left_collidable then
 			del(danger, e)
 		elseif e.dx > 0 and tile_right_collidable then
@@ -710,7 +712,7 @@ function _update()
 		elseif e.dy > 0 and tile_below_collidable then
 			del(danger, e)
 		end
-		
+
 		if e.x<camx-128 or e.x>camx+128 or e.y<0 or e.y>128 then
 			del(danger, e)
 		end
@@ -723,6 +725,9 @@ function _update()
 	move_player()
 
 	moving_soldier()
+
+	--check this
+	moveextra()
 
 	-- removing enemies that have been shot
 	for e in all(enemies) do
@@ -862,12 +867,12 @@ function _draw()
 	else
 		pausedraw()
 	end
-	
+
 
 end
 
 
-	
+
 function gamedraw()
 	--will need to readjust levels for tutorial map
 	if level==0 and levelwin==false and gameover==false then
@@ -875,7 +880,7 @@ function gamedraw()
  	camera(camx, -20)
  	map_x = 110
  	drawclouds()
- 	
+
  		if colblind == 1 then
  	pal(3,130,1)--check this
  	pal(11,137,1)
@@ -883,10 +888,11 @@ function gamedraw()
  	if colblind == 0 then
  	pal()
  	end
- 	
+
  	tutorialmap()
- 	
+
  	if player.lives>0 then
+		make_extra(9*8,6*8,98) --check sprite and these
 			spr(player.sprite, player.x, player.y+8, 1, 1, player.flipx, false)
 		end
 		--may work?
@@ -895,9 +901,9 @@ function gamedraw()
 		print('health', 1, 1, 6)
 		rectfill(1,8, player.health,9,8)
 		print('lives', 40, 1, 6)
- 	
+
 	end
-	
+
 	if level==1 and levelwin==false and gameover==false then
  	cls(5)
  	camera(camx, -16)
@@ -915,12 +921,11 @@ function gamedraw()
  	if colblind == 0 then
  	pal()
  	end
- 	
+
  	map(0, 0, 0, 0, 32*8, 9*8)
  	_drawmapsprites()
  	_moveextra()
- 	spr(extra.sprite,extra.x,extra.y,1,1,extra.flipx,false)
- 	spr(extra.spr1,extra.x1,extra.y1,1,1,extra.flipx,false)
+ 	--replace with create extra in other function
 		if player.lives>0 then
 			spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
 		end
@@ -957,16 +962,16 @@ function gamedraw()
 	if level == 2 and gameover == false then
 		level2draw()
 	end
-	
+
 	if level == 3 and gameover == false then
 		level3draw()
 	end
-	
+
 	if gamewin then
 		cls(1)
 		_winscreen()
 	end
-	
+
 end
 
 function _winscreen()
@@ -1002,8 +1007,8 @@ function _drawmapsprites()
 		if level == 1 then
 		spr(41,04*8,08*8,1,1,true,false)
 		spr(41,07*8,08*8) --booths
-		spr(41,11*8,08*8,1,1,true,false) 
-		spr(41,14*8,08*8) 
+		spr(41,11*8,08*8,1,1,true,false)
+		spr(41,14*8,08*8)
 		spr(41,18*8,08*8,1,1,true,false)
 		spr(41,21*8,08*8)
 		end
@@ -1096,7 +1101,7 @@ function pausedraw()
 end
 
 --for inventory
-function equip(truth) 
+function equip(truth)
 	if mode == 2 and truth and btnp(🅾️) then
 		--we'll have to have multiple gun types coded before i do anything here
 	end
@@ -1122,15 +1127,15 @@ function level2draw()
 	cls(0)
  camera(camx, -16)
  pal(13,134,1)
- drawclouds() 
+ drawclouds()
  map(36, 0, 0, 0, 32*8, 9*8)
  _drawmapsprites()
  _moveextra()
- spr(extra.sprite,extra.x-15,extra.y,1,1,extra.flipx,false)
+ --replace with create extra
 	if player.lives>0 then
 		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
 	end
-		
+
 	for e in all(enemies) do
 		spr(e.sprite, e.x, e.y, 1, 1, e.flipx, false)
 	end
@@ -1154,13 +1159,13 @@ function level3draw()
 	cls(0)
  camera(camx, -16)
  pal(13,134,1)
- drawclouds() 
+ drawclouds()
  map(67, 0, 0, 0, 50*8, 9*8)
  _drawmapsprites()
  if player.lives>0 then
 		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
 	end
-		
+
 	for e in all(enemies) do
 		spr(e.sprite, e.x, e.y, 1, 1, e.flipx, false)
 	end
@@ -1202,7 +1207,7 @@ function setting()
 	print("press ⬇️ to interact",17,60,7)
 	print("press x for inventory", 15,70,7)
 	print("...and still x to start", 15,80,7)
-	
+
 end
 
 function colorflip()
@@ -1217,60 +1222,37 @@ end
 -->8
 --movement section
 function _moveextra()
-		--animate old lady
+	--should be for all animations
+	for extra in all(extras) do
+		start = extra.sprite
+		end = start + 2
 		extra.sprite +=extra.timing
 
-		if(extra.sprite > 66) then
-			extra.sprite = 64
-
+			if(extra.sprite > end) then
+				extra.sprite = start
+			end
 		end
 
-		--animate young lady
-		extra.spr1 +=.75
-
-		if(extra.spr1 >= 68) then
-			extra.spr1 = 66
-
-		end
-		--animate guy
-		extra.spr2 +=extra.timing
-
-		if(extra.spr2 > 74) then
-			extra.spr2 = 76
-
-		end
-		--dx needs to be added
-		
 		--this could be super improved
-		if extra.movecount < 10 then
-		 extra.x += 2/extra.dx
-		 extra.flipx = false
-		 end
+		for extra in all(extras) do
+			if extra.movecount < 10 then
+		 		extra.x += 2/extra.dx
+		 		extra.flipx = false
+		 	end
 
-		if extra.movecount > 10 then
-		 extra.x -= 2/extra.dx
-		 extra.flipx = true
+			if extra.movecount > 10 then
+		 		extra.x -= 2/extra.dx
+		 		extra.flipx = true
 
-		 end
+		 	end
 
-		if extra.movecount< 20 then
-			extra.movecount += 1
-		else
-			extra.movecount = 0
+			if extra.movecount< 20 then
+				extra.movecount += 1
+			else
+				extra.movecount = 0
+			end
 		end
-
 		--other extra
-	if extra.movecount < 10 then
-		 extra.x1 += 2
-		 extra.flipx = false
-		 end
-
-		if extra.movecount > 10 then
-		 extra.x1 -= 2
-		 extra.flipx = true
-
-		 end
-
 
 
 	end
@@ -1321,8 +1303,8 @@ end
 
 function drawcutscene()
 	cls()
-	
-	
+
+
 	text1()
 	text2()
 	text3()
@@ -1333,9 +1315,9 @@ function text1()
 	print("north england, 196x")
 	--bottom of screen
 	print("press ➡️ to continue",40,100,0)
-	
-		
-		if cc == 1 then	
+
+
+		if cc == 1 then
 		print(".",4,5,7)
 		end
 		if cc == 2 then
@@ -1344,7 +1326,7 @@ function text1()
 		if  cc == 3 then
 		print(". . .",4,5,7)
 		end
-	
+
 end
 
 function text2()
@@ -1384,7 +1366,7 @@ function text3()
 	end
 	if cc > 12 then
 	spr(12,70,75)
-	end	
+	end
 	if cc == 14 then --test this
 	cls()
 	mode = 1
@@ -1413,7 +1395,7 @@ print("and welcome to train twm sion cati",0,0,7)
 print("on trains, people use 'arrow keys' to move",0,0,7)
 end
 --second box
-if site == 116*8 and below == 11*8 then 
+if site == 116*8 and below == 11*8 then
 print("trains tend to be passennger or cargo trains",0,0,7)
 print("this one happens to be a passenger train",0,0,7)
 print("so you'll see some other passengers--let them be",0,0,7)
@@ -1455,7 +1437,7 @@ end
 
 --formatting for printing tutorial etc?
 function txtbox()
- 
+
 end
 
 __gfx__
@@ -1754,4 +1736,3 @@ __music__
 00 00424344
 00 00424344
 00 00424344
-

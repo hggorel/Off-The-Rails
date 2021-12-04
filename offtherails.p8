@@ -652,250 +652,6 @@ function animate_player(movement)
 	end
 end
 
---[[
-function moving_soldier()
-	for actor in all(enemies) do
-		local tile_below = mget((actor.x)/ 8+map_x, (actor.y + 8) / 8)
- 	local tile_below_collidable = fget(tile_below, 0)
- 	local tile_above = mget((actor.x) / 8+map_x, (actor.y-8) / 8)
- 	local tile_above_collidable = fget(tile_above, 0)
-
-		local tile_right = mget((actor.x +8)/8+ map_x, actor.y/8)
-		local tile_right_collidable = fget(tile_right, 0)
-
-		local tile_left = mget((actor.x-8)/8+ map_x, actor.y/8)
-		local tile_left_collidable = fget(tile_left, 0)
-
-		-- if the enemy is a soldier
-		if actor.sprite <=20 and actor.sprite >=16 then
-			if actor.movecount<5 then
-				actor.x+=1
-				actor.flipx=false
-			end
-			if actor.movecount>5 then
-				actor.flipx=true
-				actor.x-=1
-			end
-
-			if actor.movecount<10 then
-				actor.movecount+=1
-			else
-				actor.movecount=0
-			end
-
-			if actor.shootcount%20==0 then
-				basic_shoot(actor.x, actor.y, actor.flipx)
-			end
-			actor.shootcount+=1
-
-
-		-- if the enemy is bames jond
-		-- bames' bullets will shoot directly at
-		-- our hero, even if not striaght
-		elseif actor.sprite>=21 and actor.sprite <=25 then
-			actor.x+=1
-
-		-- if the enemy is herlock sholmes
-		-- we want herlock to track him down
-		elseif actor.sprite>=26 and actor.sprite <=30 then
-			if not(tile_below_collidable) then
-				actor.y += player.gravity
-			elseif player.x < actor.x then
-				if not(tile_left_collidable) then
-					actor.x -= 0.5 -- move towards
-					actor.flipx = true
-				end
-			else
-				if not(tile_right_collidable) then
-					actor.x += 0.5 -- move towards
-					actor.flipx = false
-				end
-			end
-
-			if actor.movecount < 20 and actor.movecount/5 ==0 then
-				--actor.y+=1
-				actor.movecount += 1
-				actor.sprite += 1
-			else
-				actor.sprite = 26
-				actor.movecount=0
-			end
-
-			if actor.shootcount%20 == 0 then
-				herlock_shoot(actor.x, actor.y, player.x, player.y)
-			end
-			actor.shootcount+=1
-		end
-	end
-
-	--wizard movement
---	if actor.sprite >= 98 or actor.sprite <= 99 then
-
---	end
-
-end
-
-
-function check_jump_height(x, y)
-	-- i starts at 8 because you want to start checking
-	-- for collision one 8x8 block below the character.
-	-- 8 < 24 will check two blocks below the character
- for i=8, 15, 1 do
- 	for j=0, 7, 1 do
- 		local tile = mget((player.x+j)/8+map_x, (player.y+i)/8)
- 		if (fget(tile, 0)) then
- 			return (i-8)
- 		end
- 	end
- end
-	-- -1 indicates that height can not be detected because
-	-- height only detects two blocks below
-	-- so we must be higher than two blocks
-	return 16
-end
-
-function check_ceiling_height()
-	-- i starts at 0 because you want to start checking
-	-- for collision one 8x8 block above the character.
-	-- 8 < 24 will check two blocks above the character
- for i=1, 15, 1 do
-  for j=0, 7, 1 do
-  	local tile = mget((player.x + j) / 8 + map_x, (player.y - i) / 8)
-
-			if (fget(tile, 0)) then
-				return (i - 1)
-			end
-
-		end
-	end
- -- 16 indicates that we are at least two blocks away
-	return 16
-
-end
-
-
-function calculate_y_movement()
-
-	local ceiling_height = check_ceiling_height()
-	local jump_height = check_jump_height()
-
-	if (jump_height == 0) player.is_standing = true
-	if (jump_height > 0) player.is_standing = false
-
-	-- applies gravity every frame
-	if not player.is_standing then
-		player.dy -= player.gravity
-		if (player.dy < -3) player.dy = -3
-	end
-
-	-- if we are falling past the floor,
-	-- fix it by changing dy to the height from the floor
-	-- so we get sucked to the ground instead
-	if (player.dy < 0) and (player.dy + jump_height < 0) then
-		player.is_standing = true
-		player.dy = (-1 * jump_height)
-	end
-
-	if(player.dy > 0) and (player.dy - ceiling_height > 0) then
-		player.dy = (-1 * ceiling_height)
-	end
-
-	-- when the player lets go, and we are moving up
-	-- then we fraction vertical velocity to start falling sooner
-	if (not btn(2) and not player.is_standing and player.dy > 0) player.dy *= 0.5
-
- -- jump is pressed, jump up
-	if btnp(2) and player.is_standing then
-		player.dy += player.jump_force
-		player.is_standing = false
-	end
-
-	-- make dy negative because positive dy moves character downward
- return (-1 * player.dy)
-end
-
-function check_collide_left()
-
-	for i=1, 8, 1 do
-		for j=0, 7, 1 do
-			local tile = mget((player.x - i) / 8 + map_x, (player.y + j) / 8)
-
-			if (fget(tile, 0)) return (i - 1)
-		end
-	end
- -- 9 indicates we are at least 1 block away
-	return 9
-
-end
-
-
-function check_collide_right()
-
- for i=0, 7, 1 do
-  for j=8, 15, 1 do
-			local tile = mget((player.x + j) / 8 + map_x, (player.y + i) / 8)
-
-			if (fget(tile, 0)) return (j - 8)
-		end
-	end
- -- 9 indicates we are at least 1 block away
-	return 9
-
-end
-
-function calculate_x_movement()
-
-	local collide_distance_right = check_collide_right()
-	local collide_distance_left = check_collide_left()
-
-	-- if we arent moving left or right,
-	-- slow down the player if they are in the air
-	if(not btn(1) and not btn(0) and not player.is_standing) then
-	 player.dx *= player.air_resistance
-	end
-	-- if we are standing instead of in the air, friction is greater
- if(not btn(1) and not btn(0) and player.is_standing) then
-		player.dx *= player.friction
-	end
-
-	-- move right, increases until we reach max speed
-	if btn(1) then
-		player.flipx = true
-		player.dx += player.run_force
-		if (player.dx > player.dx_max) player.dx = player.dx_max
-	end
-
-	-- move left, decreases until we reach minimum speed
-	-- (-1 * player.dx_max is just the negative direction maximum)
-	if btn(0) then
-		player.flipx = false
-		player.dx -= player.run_force
-		if (player.dx < (-1 * player.dx_max)) player.dx = (-1 * player.dx_max)
-	end
-
-	if (player.dx > 0) then
-		-- snaps movement right to the wall
-		-- keep collide_distance_right positive because we are moving right
-		if(player.dx - collide_distance_right > 0) player.dx = collide_distance_right
-	end
-
-	temp_dx = player.dx
-
-	if (btn(0) and player.dx < 0) then
-		-- snaps movement left to the wall
-		-- make collide_distance_left negative cause we are moving left
-		if (player.dx + collide_distance_left < 0) then
-			player.dx = (-1 * collide_distance_left)
-		end
- end
-
-	return player.dx
-
-end
-
---]]
-
-
 function move_player()
 
 	local allowance=14
@@ -961,15 +717,26 @@ function move_player()
  		mset(91, 7, 50)
  		mset(91, 6, 50)
  	end
+ 	if level == 0 and tile_character_on == 57 then
+ 		mset(113, 5, 58)
+ 		mset(120, 2, 50)
+ 		mset(121, 2, 50)
+ 		mset(122, 2, 50)
+ 		mset(119, 7, 151)
+ 		mset(120, 7, 151)
+ 		mset(121, 7, 151)
+ 	end
  	if tile_character_on ==61 or tile_character_on == 179 then
  		level+=1
  		sfx(03)
  		if (level==1) then
+ 			mset(3,5,50)
  			create_soldier(40, 64)
 				create_soldier(160, 64)
 				map_x=0
 				player.x=32
 				player.y=64
+				camx=-8
 			end
  		if (level==2) then
  			for e in all(enemies) do
@@ -1280,7 +1047,7 @@ function gamedraw()
  	tutorialmap()
 
  	if player.lives>0 then
-			spr(player.sprite, player.x, player.y+8, 1, 1, player.flipx, false)
+			spr(player.sprite, player.x, player.y+10, 1, 1, player.flipx, false)
 		end
 		--may work?
 		tutorialtext(player.x,player.y)
@@ -1288,7 +1055,11 @@ function gamedraw()
 		print('health', 1, 1, 6)
 		rectfill(1,8, player.health,9,8)
 		print('lives', 40, 1, 6)
-
+  for h in all(lives) do
+			spr(h.sprite, h.x, h.y)
+		end
+  spr(14, 88, 0)
+		print(player.ammo_count, 96, 1, 6)
 	end
 
 	if level==1 and levelwin==false and gameover==false then
@@ -1335,6 +1106,8 @@ function gamedraw()
 		for h in all(lives) do
 			spr(h.sprite, h.x, h.y)
 		end
+		spr(14, 88, 0)
+		print(player.ammo_count, 96, 1, 6)
 	end
 
 	if gameover then
@@ -1541,6 +1314,8 @@ function level2draw()
 	for h in all(lives) do
 		spr(h.sprite, h.x, h.y)
 	end
+	spr(14, 88, 0)
+	print(player.ammo_count, 96, 1, 6)
 end
 
 function level3draw()
@@ -1548,6 +1323,16 @@ function level3draw()
  camera(camx, -16)
  pal(13,134,1)
  drawclouds()
+ 
+ 		--test this
+ if colblind == 1 then
+ pal(3,130,1)--check this
+ pal(11,137,1)
+ end
+ if colblind == 0 then
+ pal()
+ end
+ 
  map(67, 0, 0, 0, 50*8, 9*8)
  _drawmapsprites()
  if player.lives>0 then
@@ -1571,6 +1356,8 @@ function level3draw()
 	for h in all(lives) do
 		spr(h.sprite, h.x, h.y)
 	end
+	spr(14, 88, 0)
+	print(player.ammo_count, 96, 1, 6)
 end
 
 --settings
@@ -2122,8 +1909,8 @@ __map__
 722032212232322122322122323221223221223232212232322122323221222000000000958586879385868687938485878484848587849384848484938586879500007220323232322122323232323232323232322122323232323f3232323272ffffffffffffff000000000000963232323283833232323232323232323296
 723131313131313131313131313131313131313131313132322c2c323131312000000000958488849384848484938484848484848484849384a6a5849384842f9500007231313131313131313131313131313131313131313131313f312c313172ffffffffffffff000000000000963232323232328332323232323232323296
 202020202020202020202020202020202020202020202020313c3c312020202000000000969494949484848484949494949494949494949484b6b5849494949696000072202020202020202020202020202020202020202020202020203c322072ffffffffffff000000000000003b3232212232323232323232322122323296
-00000000000000000000000000000000000000000000002020202020200000000000000000000000969494949496a10000000000000000969494949496000000000000000000000000000000000000000000000000000000000000000020200000ffffffffffff000000000000003b2d98323232983292923298323232323296
-000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffff0000000000000000003b3d31313131319292929231313131313196
+00000000000000000000000000000000000000000000002020202020200000000000000000000000969494949496a10000000000000000969494949496000000000000000000000000000000000000000000000000000000000000000020200000ffffffffffff000000000000003b3298323232983292923298323232323296
+000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000ffff0000000000000000003b3131313131319292929231313131313196
 0000000000000000c50000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000929292929292929292929292929292929292
 0000006a6a6a6a6a6a6a6a6a6a6a6a6a6a000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 6969004c0000000000000000004c646566000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -2147,3 +1934,4 @@ __music__
 00 00424344
 00 00424344
 00 00424344
+

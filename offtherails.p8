@@ -330,6 +330,7 @@ function animate_soldier(soldier)
 		end
 end
 
+
 function move_herlock(herlock)
 
 	local herlock_height = check_jump_height(herlock)
@@ -379,10 +380,15 @@ function move_herlock(herlock)
 
 	herlock.move_count += 1
 
+
 end
 
 function animate_herlock(herlock)
-
+	--animation
+	if (herlock.move_count % 3 == 0) then
+			herlock.sprite += .5
+			if(herlock.sprite > 29) herlock.sprite = 26
+		end
 end
 
 function moving_actors()

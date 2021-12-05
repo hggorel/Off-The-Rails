@@ -320,7 +320,6 @@ function animate_soldier(soldier)
 		end
 end
 
-
 function move_herlock(herlock)
 
 	local herlock_height = check_jump_height(herlock)
@@ -369,7 +368,6 @@ function move_herlock(herlock)
 	herlock.y += (-1 * herlock.dy)
 
 	herlock.move_count += 1
-
 
 end
 
@@ -654,76 +652,29 @@ end
 --[[
 function moving_soldier()
 	for actor in all(enemies) do
-		local tile_below = mget((actor.x)/ 8+map_x, (actor.y + 8) / 8)
+		local tile_below = mget((actor.x)/ 8+map_x, (actor.y + 7) / 8)
  	local tile_below_collidable = fget(tile_below, 0)
  	local tile_above = mget((actor.x) / 8+map_x, (actor.y-8) / 8)
+
  	local tile_above_collidable = fget(tile_above, 0)
 
-		local tile_right = mget((actor.x +8)/8+ map_x, actor.y/8)
+		local tile_right = mget((actor.x +7)/8+ map_x, actor.y/8)
 		local tile_right_collidable = fget(tile_right, 0)
 
-		local tile_left = mget((actor.x-8)/8+ map_x, actor.y/8)
+		local tile_left = mget((actor.x)/8+ map_x, actor.y/8)
 		local tile_left_collidable = fget(tile_left, 0)
 
-		-- if the enemy is a soldier
-		if actor.sprite <=20 and actor.sprite >=16 then
-			if actor.movecount<5 then
-				actor.x+=1
-				actor.flipx=false
-			end
-			if actor.movecount>5 then
-				actor.flipx=true
-				actor.x-=1
-			end
+		if actor.type == "soldier" then
+			move_soldier(actor)
+			animate_soldier(actor)
+		end
 
-			if actor.movecount<10 then
-				actor.movecount+=1
-			else
-				actor.movecount=0
+		if actor.type == "herlock" then
+			move_herlock(actor)
+			if (actor.move_count % 20 == 0) then
+			 			herlock_shoot(actor.x, actor.y, player.x, player.y)
 			end
-
-			if actor.shootcount%20==0 then
-				basic_shoot(actor.x, actor.y, actor.flipx)
-			end
-			actor.shootcount+=1
-
-
-		-- if the enemy is bames jond
-		-- bames' bullets will shoot directly at
-		-- our hero, even if not striaght
-		elseif actor.sprite>=21 and actor.sprite <=25 then
-			actor.x+=1
-
-		-- if the enemy is herlock sholmes
-		-- we want herlock to track him down
-		elseif actor.sprite>=26 and actor.sprite <=30 then
-			if not(tile_below_collidable) then
-				actor.y += player.gravity
-			elseif player.x < actor.x then
-				if not(tile_left_collidable) then
-					actor.x -= 0.5 -- move towards
-					actor.flipx = true
-				end
-			else
-				if not(tile_right_collidable) then
-					actor.x += 0.5 -- move towards
-					actor.flipx = false
-				end
-			end
-
-			if actor.movecount < 20 and actor.movecount/5 ==0 then
-				--actor.y+=1
-				actor.movecount += 1
-				actor.sprite += 1
-			else
-				actor.sprite = 26
-				actor.movecount=0
-			end
-
-			if actor.shootcount%20 == 0 then
-				herlock_shoot(actor.x, actor.y, player.x, player.y)
-			end
-			actor.shootcount+=1
+			animate_herlock(actor)
 		end
 	end
 
@@ -741,7 +692,8 @@ function check_jump_height(x, y)
 	-- 8 < 24 will check two blocks below the character
  for i=8, 15, 1 do
  	for j=0, 7, 1 do
- 		local tile = mget((player.x+j)/8+map_x, (player.y+i)/8)
+ 		local tile = mget((actor.x + j) / 8 + map_x, (actor.y + i) / 8)
+
  		if (fget(tile, 0)) then
  			return (i-8)
  		end
@@ -753,13 +705,13 @@ function check_jump_height(x, y)
 	return 16
 end
 
-function check_ceiling_height()
+function check_ceiling_height(actor)
 	-- i starts at 0 because you want to start checking
 	-- for collision one 8x8 block above the character.
 	-- 8 < 24 will check two blocks above the character
  for i=1, 15, 1 do
   for j=0, 7, 1 do
-  	local tile = mget((player.x + j) / 8 + map_x, (player.y - i) / 8)
+  	local tile = mget((actor.x + j) / 8 + map_x, (actor.y - i) / 8)
 
 			if (fget(tile, 0)) then
 				return (i - 1)
@@ -775,8 +727,8 @@ end
 
 function calculate_y_movement()
 
-	local ceiling_height = check_ceiling_height()
-	local jump_height = check_jump_height()
+	local ceiling_height = check_ceiling_height(player)
+	local jump_height = check_jump_height(player)
 
 	if (jump_height == 0) player.is_standing = true
 	if (jump_height > 0) player.is_standing = false
@@ -813,11 +765,11 @@ function calculate_y_movement()
  return (-1 * player.dy)
 end
 
-function check_collide_left()
+function check_collide_left(actor)
 
 	for i=1, 8, 1 do
 		for j=0, 7, 1 do
-			local tile = mget((player.x - i) / 8 + map_x, (player.y + j) / 8)
+			local tile = mget((actor.x - i) / 8 + map_x, (actor.y + j) / 8)
 
 			if (fget(tile, 0)) return (i - 1)
 		end
@@ -827,12 +779,12 @@ function check_collide_left()
 
 end
 
+function check_collide_right(actor)
 
-function check_collide_right()
 
  for i=0, 7, 1 do
   for j=8, 15, 1 do
-			local tile = mget((player.x + j) / 8 + map_x, (player.y + i) / 8)
+			local tile = mget((actor.x + j) / 8 + map_x, (actor.y + i) / 8)
 
 			if (fget(tile, 0)) return (j - 8)
 		end
@@ -844,8 +796,8 @@ end
 
 function calculate_x_movement()
 
-	local collide_distance_right = check_collide_right()
-	local collide_distance_left = check_collide_left()
+	local collide_distance_right = check_collide_right(player)
+	local collide_distance_left = check_collide_left(player)
 
 	-- if we arent moving left or right,
 	-- slow down the player if they are in the air
@@ -892,8 +844,8 @@ function calculate_x_movement()
 
 end
 
---]]
 
+--]]
 
 function move_player()
 
@@ -960,10 +912,20 @@ function move_player()
  		mset(91, 7, 50)
  		mset(91, 6, 50)
  	end
+ 	if level == 0 and tile_character_on == 57 then
+ 		mset(113, 5, 58)
+ 		mset(120, 2, 50)
+ 		mset(121, 2, 50)
+ 		mset(122, 2, 50)
+ 		mset(119, 7, 151)
+ 		mset(120, 7, 151)
+ 		mset(121, 7, 151)
+ 	end
  	if tile_character_on ==61 or tile_character_on == 179 then
  		level+=1
  		sfx(03)
  		if (level==1) then
+ 			mset(3,5,50)
  			create_npc(50,24,64,"olady")
  			create_npc(70,64,66,"ylady")
  			create_soldier(40, 64)
@@ -971,6 +933,7 @@ function move_player()
 				map_x=0
 				player.x=32
 				player.y=64
+				camx=-8
 			end
  		if (level==2) then
  			for e in all(enemies) do
@@ -1280,11 +1243,18 @@ function gamedraw()
  	map_x = 110
  	drawclouds()
 
+if colblind == 1 then
+ 	pal(3,130,1)--check this
+ 	pal(11,137,1)
+ 	end
+ 	if colblind == 0 then
+ 	pal()
+ 	end
 
  	tutorialmap()
 
  	if player.lives>0 then
-			spr(player.sprite, player.x, player.y+8, 1, 1, player.flipx, false)
+			spr(player.sprite, player.x, player.y+10, 1, 1, player.flipx, false)
 		end
 	
 		camera()
@@ -1295,6 +1265,12 @@ function gamedraw()
 		print('health', 1, 1, 6)
 		rectfill(1,8, player.health,9,8)
 		print('lives', 40, 1, 6)
+
+  for h in all(lives) do
+			spr(h.sprite, h.x, h.y)
+		end
+  spr(14, 88, 0)
+		print(player.ammo_count, 96, 1, 6)
 
 	end
 
@@ -1345,6 +1321,8 @@ function gamedraw()
 		for h in all(lives) do
 			spr(h.sprite, h.x, h.y)
 		end
+		spr(14, 88, 0)
+		print(player.ammo_count, 96, 1, 6)
 	end
 
 	if gameover then
@@ -1568,6 +1546,8 @@ function level2draw()
 	for h in all(lives) do
 		spr(h.sprite, h.x, h.y)
 	end
+	spr(14, 88, 0)
+	print(player.ammo_count, 96, 1, 6)
 end
 
 function level3draw()
@@ -1575,6 +1555,15 @@ function level3draw()
  camera(camx, -16)
  pal(13,134,1)
  drawclouds()
+ 
+ 		--test this
+ if colblind == 1 then
+ pal(3,130,1)--check this
+ pal(11,137,1)
+ end
+ if colblind == 0 then
+ pal()
+ end
  
  map(67, 0, 0, 0, 50*8, 9*8)
   if colblind == 1 then
@@ -1605,6 +1594,8 @@ function level3draw()
 	for h in all(lives) do
 		spr(h.sprite, h.x, h.y)
 	end
+	spr(14, 88, 0)
+	print(player.ammo_count, 96, 1, 6)
 end
 
 --settings
@@ -1665,6 +1656,7 @@ function _moveextra()
 			end
 		end
 	end
+
 
 		--this could be super improved
 		for extra in all(extras) do
@@ -1836,6 +1828,7 @@ print("a PASSENGER TRAIN",30,38,0)
 print("use ⬅️⬆️➡️ to move",27,48,0)
 end
 --second box
+
 if site == 6 and below>87 then
 txtbox()
 spr(64,48,56)
@@ -1902,6 +1895,7 @@ end
 
 --formatting for printing tutorial etc?
 function txtbox()
+
 	rectfill(10,15,120,65,7)
 	rect(9,14,121,66,8)
 	print("♥",110,58,8)
@@ -1927,14 +1921,14 @@ function txtvalues(site)
 	return siter
 end
 __gfx__
-00000000008888800088880000888800008888000088880000888800008888000088888000888880008888000000a00000000000000000000000000000000000
-0000000008fff88000f8888000f8888000f8888000f8888000f8888000f8888008fff88008fff88008fff880000aa00000000000000000000000000000000000
-0aaa0000083f388000f3888000f3888800f3888800f38880003f888800f38888883f3888083f3888083f388000aaaa0001555555015555500060606000000000
-0a9aaa0008fff88000ff888000ff888800ff888800ff888000ff888800ff8888f8fff8f8088ff458f8fff8f002272220041111500411150009a9a99000000000
-0aaaa0000111118052111880521118805211180054111880541118805411180011111110008141f0011111100a8aa8a0445000004450000009a9a9a000000000
-0aaaa000011111000f2110000f2110000f2110000f4110000f4110000f41100000111000001f1000081118800a2a82a0440000004400000009a9a8a000000000
-009040000f101f000010150000101000001510000010150000101000001510000015150000151500001110450022220000000000440000000999888000000000
-00000000005050000050000000505000000050000050000000505000000050000000000000000000051514000777777000000000000000000000080000000000
+00000000008888800088880000888800008888000088880000888800008888000088880000888880008888000000a00000000000000000000000000000000000
+0000000008fff88000f8888000f8888000f8888000f8888000f8888000f8888000f8888008fff88008fff880000aa00000000000000000000000000000000000
+0aaa0000083f388000f3888800f3888800f3888800f3888800f3888000f3888800f38880083f3888083f388000aaaa0001555555015555500060606000000000
+0a9aaa0008fff88000ff888000ff888000ff888000ff888000ff888000ff888000ff8880088ff458f8fff8f002272220041111500411150009a9a99000000000
+0aaaa0000111118054111000541110005411100054111000541118805211100054111880008141f0011111100a8aa8a0445000004450000009a9a9a000000000
+0aaaa000011111000f4110000f4110000f4110000f4110000f4110000f2110000f411000001f1000081118800a2a82a0440000004400000009a9a8a000000000
+009040000f111f000811180000181000008110000811180000111000001110000011100000151500001110450022220000000000440000000999888000000000
+00000000008080000000000000800000000080000000000000808000000080000080800000000000051514000777777000000000000000000000080000000000
 01110000001110000011100000111000011100000044400000444000004440000044400000444000000000000000000000000000000000000044400000000000
 0111000000111000001110000011100001110000004fc000004fc000004fc000004fc000004fc000004440000044400000444000004440000044440000000000
 0111000000111000001110000011100001ff000000fff00000fff00000fff00000fff00000fff0000044440000444400004444000044440004fff06000000000

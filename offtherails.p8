@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 33
+version 32
 __lua__
 --off the rails
 --from hannah, christian, elise and alex
@@ -588,6 +588,16 @@ function calculate_x_movement()
 		if (player.dx + collide_distance_left < 0) then
 			player.dx = (-1 * collide_distance_left)
 		end
+ end
+ if(btn(1) and btn(0)) then
+  if(player.dx > 0) then
+     player.flipx = false
+  end
+  if(player.dx < 0) then
+    player.flipx = true
+    player.dx = (-1 * player.run_force)
+    --if (player.dx < (-1 * player.dx_max)) player.dx = (-1 * player.dx_max)
+   end
  end
 
 	return player.dx
@@ -1395,22 +1405,8 @@ function level4draw()
  drawclouds()
  
  		--test this
- if colblind == 1 then
- pal(3,130,1)--check this
- pal(11,137,1)
- end
- if colblind == 0 then
- pal()
- end
  
  map(36, 16, 0, 0, 50*8, 9*8)
-  if colblind == 1 then
- 	pal(3,130,1)--check this
- 	pal(11,137,1)
- 	end
- 	if colblind == 0 then
- 	pal()
- 	end
  _drawmapsprites()
  if player.lives>0 then
 		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
@@ -1426,6 +1422,8 @@ function level4draw()
 		spr(b.sprite, b.x, b.y)
 	end
 	camera()
+	
+	
 	print('health', 1, 1, 6)
 	rectfill(1,8, player.health,9,8)
 	print('lives', 40, 1, 6)
@@ -1549,6 +1547,13 @@ function drawclouds()
 	spr(cloud.spr2, cloud.x+10, 20)
 	spr(cloud.spr1, cloud.x+20, 54)
 	end
+	if level==4 then
+	rectfill(0, 0, 225, 70, 12)
+	moveclouds()
+	spr(cloud.spr1, cloud.x, 40)
+	spr(cloud.spr2, cloud.x+10, 20)
+	spr(cloud.spr1, cloud.x+20, 54)
+	end
 end
 
 function moveclouds()
@@ -1661,9 +1666,9 @@ function tutorialtext(site,below)
 if flr(site)==2 and below>87 then
 txtbox()
 spr(train.sprite,35,56,7,1)
-print("yOU ARE ON THE",35,18,0)
-print("tWM sION cATI:",35,28,0)
-print("a PASSENGER TRAIN",30,38,0)
+print("you are on the",35,18,0)
+print("twm sion cati:",35,28,0)
+print("a passenger train",30,38,0)
 print("use ⬅️⬆️➡️ to move",27,48,0)
 end
 --second box
@@ -1673,34 +1678,35 @@ txtbox()
 spr(64,48,56)
 spr(74,58,56)
 spr(66,68,56)
-print("sINCE THIS IS A",35,18,0)
-print("PASSENGER TRAIN,",35,28,0)
-print("YOU'LL SEE PASSENGERS.",24,38,0)
-print("lET THEM BE.",35,48,0)
+print("since this is a",35,18,0)
+print("passenger train,",35,28,0)
+print("you'll see passengers.",24,38,0)
+print("let them be.",35,48,0)
 end
 --third box
 if site == 11 and below>87 then
 txtbox()
 spr(16,58,56)
-print("hOSTILES WILL ALSO",30,18,0)
-print("LURK AROUND THE TRAIN.",21,28,0)
-print("pRESS z OR 🅾️ TO SHOOT:",20,38,0)
-print("OR THEY'LL GET YOU!",30,48,0)
+print("hostiles will also",30,18,0)
+print("lurk around the train.",21,28,0)
+print("press z or 🅾️ to shoot:",20,38,0)
+print("or they'll get you!",30,48,0)
 
 end
 --fourth box
 if site==2 and below<45 then
 txtbox()
-print("tO INTERACT WITH OBJECTS",15,18,0)
-print("hIT ⬇️ ON TOP OF AN OBJECT",15,28,0)
-print("iN eNGLAND, THIS IS KNOWN",15,38,0)
-print("AS TAKING A 'gander'",35,48,0)
+print("to interact with objects",15,18,0)
+print("hit ⬇️ on top of an object",15,28,0)
+print("in england, this is known",15,38,0)
+print("as taking a 'gander'",35,48,0)
 end
 --fifth box
-if site==13 and below<45 then
+if site==12 and below<45 then
 txtbox()
-print("yOU'LL NEED TO HIT",30,18,0,7)
-print("⬇️ TWICE TO EXIT THRU A DOOR",15,28,0)
+print("you'll need to hit",30,18,0,7)
+print("⬇️ twice",45,28,0)
+print(" to exit thru a door",25,38,0)
 end
 end
 
@@ -1742,6 +1748,7 @@ end
 
 function txtvalues(site)
 	siter = false
+	if level==0 then
 	if flr(site)==4 then
 		siter = true
 	end
@@ -1754,10 +1761,26 @@ function txtvalues(site)
 	if  flr(site)==11 then
 		siter=true
 	end
-	if flr(site)==13 then
+	if flr(site)==12 then
 		siter=true
 	end
+	end
+	if level==4 then
+		if flr(site)==25 then
+			siter=true
+		end
+	end
 	return siter
+end
+
+function lev4txt(site,below)
+if flr(site)==2 and below>87 then
+	txtbox()
+	spr(98,50,56)
+	print("wATCH OUT!",35,18,0)
+	print("iN eNGLAND, THEY HAVE",35,28,0)
+	print("'wizards', PROBABLY.",30,38,0)
+	end
 end
 __gfx__
 00000000008888800088880000888800008888000088880000888800008888000088880000888880008888000000a00000000000000000000000000000000000

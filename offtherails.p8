@@ -6,7 +6,7 @@ __lua__
 --basic set up sections
 --in the game
 
-
+ 
 function _init()
 	mode = 0 --for title call
 	level= 0 --for changing levels
@@ -1029,6 +1029,8 @@ end
 
 
 function gamedraw()
+	player.lives=difficulty 
+	--above death confimred
 	--will need to readjust levels for tutorial map
 	if level==0 and levelwin==false and gameover==false then
 		cls(5)
@@ -1051,6 +1053,7 @@ if colblind == 1 then
 		end
 	
 		camera()
+		
 		site =flr(player.x/8)
 		if txtvalues(site) then
 			tutorialtext(site,player.y)
@@ -1279,11 +1282,12 @@ function pausedraw()
 		print(player.ammo_count,20,50,7)
 		print("bullets left",30,50,7)
 		end
-		if sel.place >= 1 and sel.place < 3 then
+		--equip removed (only one gun)
+	--[[	if sel.place >= 1 and sel.place < 3 then
 		equip(true) --should work like this?
 		rect(27,68,27+48,68+8,7)
 		print("🅾️ to equip",30,70,7)
-		end
+		end ]]--
 end
 
 --for inventory
@@ -1423,6 +1427,7 @@ function level4draw()
 		spr(b.sprite, b.x, b.y)
 	end
 	camera()
+	
 	
 	--find bext location for this bit of code
 	site =flr(player.x/8)
@@ -1573,7 +1578,8 @@ function drawclouds()
 	spr(cloud.spr1, cloud.x+20, 54)
 	end
 	if level==4 then
-	rectfill(0, 0, 225, 70, 12)
+	rectfill(0, 0, 225, 120, 12)
+	rectfill(8*8,112,160,120,0)
 	moveclouds()
 	spr(cloud.spr1, cloud.x, 40)
 	spr(cloud.spr2, cloud.x+10, 20)
@@ -1799,7 +1805,8 @@ function txtvalues(site)
 end
 
 function lev4txt(site,below)
-if flr(site)==2 and below>87 then
+print(player.x,100,0,0)
+if flr(site)==9 and below>60 then
 	txtbox()
 	spr(98,50,56)
 	print("wATCH OUT!",35,18,0)

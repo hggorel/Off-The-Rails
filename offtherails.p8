@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 32
+version 33
 __lua__
 --off the rails
 --from hannah, christian, elise and alex
@@ -11,7 +11,6 @@ function _init()
 	mode = 0 --for title call
 	level= 0 --for changing levels
 	colblind = 0 --for colorblind settings
-	difficulty = 3 --standard is 3 hearts
 	if mode == 0 then
 		titleupdate()
 	end
@@ -40,7 +39,7 @@ function _init()
 		sprite = 1,
 		sprite_speed = 3,
 		health = 50,
-		lives=difficulty,
+		lives=3,
 		x = 32,
 		y = 64,
 		ammo_count = 12,
@@ -1025,12 +1024,14 @@ function _draw()
 		pausedraw()
 	end
 
-
+	print(player.lives, 100, 110)
 end
 
 
 
 function gamedraw()
+
+	_fix_hearts()
 	--will need to readjust levels for tutorial map
 	if level==0 and levelwin==false and gameover==false then
 		cls(5)
@@ -1151,6 +1152,15 @@ if colblind == 1 then
 		_winscreen()
 	end
 
+end
+
+function _fix_hearts()
+	if player.lives < 3 then
+		del(lives, heart3)
+	end
+	if player.lives < 2 then
+		del(lives, heart2)
+	end
 end
 
 function _winscreen()
@@ -1462,7 +1472,7 @@ function setting()
 		end
 	end
 	print("your starting health is:",10,30,7)
-	print(difficulty,110,30,8)
+	print(player.lives,110,30,8)
 	updiff()
 	--pass some value to gamedraw
 	--this will be implemented later
@@ -1487,16 +1497,17 @@ end
 
 function updiff()
 	if btnp(➡️) then
-		if difficulty<3 then
-			difficulty += 1
+		if player.lives<3 then
+			player.lives += 1
 		end
 	end
 	downdiff()
 end
+
 function downdiff()
 	if btnp(⬅️) then
-		if difficulty>1 then
-			difficulty -=1
+		if player.lives>1 then
+			player.lives -=1
 		end
 	end
 end

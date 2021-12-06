@@ -11,6 +11,7 @@ function _init()
 	mode = 0 --for title call
 	level= 0 --for changing levels
 	colblind = 0 --for colorblind settings
+	difficulty = 3 --standard is 3 hearts
 	if mode == 0 then
 		titleupdate()
 	end
@@ -39,7 +40,7 @@ function _init()
 		sprite = 1,
 		sprite_speed = 3,
 		health = 50,
-		lives=1,
+		lives=difficulty,
 		x = 32,
 		y = 64,
 		ammo_count = 12,
@@ -1423,6 +1424,11 @@ function level4draw()
 	end
 	camera()
 	
+	--find bext location for this bit of code
+	site =flr(player.x/8)
+	if txtvalues(site) then
+		lev4txt(site,player.y)
+	end
 	
 	print('health', 1, 1, 6)
 	rectfill(1,8, player.health,9,8)
@@ -1449,14 +1455,17 @@ function setting()
 			colorreset()
 		end
 	end
+	print("your starting health is:",10,30,7)
+	print(difficulty,110,30,8)
+	updiff()
 	--pass some value to gamedraw
 	--this will be implemented later
-	print("in game instructions:",15,30,7)
-	print("use arrow keys to move",10,40,7)
-	print("press z to shoot", 20,50,7)
-	print("press ⬇️ to interact",17,60,7)
-	print("press x for inventory", 15,70,7)
-	print("...and still x to start", 15,80,7)
+	print("in game instructions:",15,40,7)
+	print("use arrow keys to move",10,50,7)
+	print("press z to shoot", 20,60,7)
+	print("press ⬇️ to interact",17,70,7)
+	print("press x for inventory", 15,80,7)
+	print("...and still x to start", 15,90,7)
 
 end
 
@@ -1468,6 +1477,22 @@ end
 
 function colorreset()
 		colblind = 0
+end
+
+function updiff()
+	if btnp(➡️) then
+		if difficulty<3 then
+			difficulty += 1
+		end
+	end
+	downdiff()
+end
+function downdiff()
+	if btnp(⬅️) then
+		if difficulty>1 then
+			difficulty -=1
+		end
+	end
 end
 -->8
 --movement section

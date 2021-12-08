@@ -1024,7 +1024,6 @@ function _draw()
 		pausedraw()
 	end
 
-	print(player.lives, 100, 110)
 end
 
 
@@ -1232,7 +1231,7 @@ function titledraw()
 	color(1)
 	rect(0, 0, 127, 127)
 		print("press ❎ to start",3,3,7)
-		print("press 🅾️ for instructions",3,11,7)
+		print("press z for settings",3,11,7)
 		print("press ➡️ for story",3,19,7)
 		spr(107,45,45,4,2)
 	if cc > 0 then
@@ -1471,17 +1470,18 @@ function setting()
 			colorreset()
 		end
 	end
-	print("your starting health is:",10,30,7)
+	print("your starting lives are:",10,30,7)
 	print(player.lives,110,30,8)
 	updiff()
+	print("(press the ➡️ ⬅️ to adjust)", 10, 40, 7)
 	--pass some value to gamedraw
 	--this will be implemented later
-	print("in game instructions:",15,40,7)
-	print("use arrow keys to move",10,50,7)
-	print("press z to shoot", 20,60,7)
-	print("press ⬇️ to interact",17,70,7)
-	print("press x for inventory", 15,80,7)
-	print("...and still x to start", 15,90,7)
+	print("in game instructions:",15,50,7)
+	print("use arrow keys to move",10,60,7)
+	print("press z to shoot", 20,70,7)
+	print("press ⬇️ to interact",17,80,7)
+	print("press x for inventory", 15,90,7)
+	print("...and still x to start", 15,100,7)
 
 end
 

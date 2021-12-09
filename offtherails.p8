@@ -1482,7 +1482,7 @@ function setting()
 			colorreset()
 		end
 	end
-	print("your starting health is:",10,30,7)
+	print("your starting lives are:",10,30,7)
 	print(player.lives,110,30,8)
 	updiff()
 	print("(use ⬅️➡️ to change your health)",0,40,7)

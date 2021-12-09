@@ -1,5 +1,5 @@
 pico-8 cartridge // http://www.pico-8.com
-version 32
+version 33
 __lua__
 
 --off the rails
@@ -40,7 +40,7 @@ function _init()
 		sprite = 1,
 		sprite_speed = 3,
 		health = 50,
-		lives=3,
+		lives=2,
 		x = 32,
 		y = 64,
 		ammo_count = 12,
@@ -1030,7 +1030,6 @@ function _draw()
 		pausedraw()
 	end
 
-	print(player.lives, 100, 110)
 end
 
 
@@ -1842,7 +1841,7 @@ function txtvalues(site)
 end
 
 function lev4txt(site,below)
-if flr(site)==26 and below>40 then
+if flr(site)==25 and below>80 then
 	txtbox()
 	spr(98,50,56)
 	print("watch out!",35,18,0)

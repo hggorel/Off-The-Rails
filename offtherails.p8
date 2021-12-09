@@ -268,15 +268,16 @@ end
 
 function check_push()
 	for i in all(items) do
-		if box_hit(player, i) == true then
-		 i.x += player.dx
+		if box_hit(player, i) == true then		 
+		 i.x += player.dx+0.5
 		end
 		
 		if abs(i.x - 200) <=1 then
-			mset(92, 32, 153)
+			mset(92, 4, 153)
 			mset(91, 8, 49)
  		mset(91, 7, 50)
  		mset(91, 6, 50)
+ 		del(items, i)
 		end
 	end
 end
@@ -583,6 +584,7 @@ function calculate_x_movement()
 
 	temp_dx = player.dx
 
+
 	if (btn(0) and player.dx < 0) then
 		-- snaps movement left to the wall
 		-- make collide_distance_left negative cause we are moving left
@@ -640,10 +642,20 @@ function move_player()
 	local tile_left_collidable = fget(tile_left_character, 0)
 	flip_switch(tile_right_character, tile_left_character)
 	grab_suitcase(tile_left_character)
-	check_push(tile_right_character, tile_left_character)
 
 	x_move = calculate_x_movement()
 	y_move = calculate_y_movement()
+	
+	check_push(tile_right_character, tile_left_character)
+	--for i in all(items) do
+	--	if i.y_collide then
+	--		if y_move < 0 then
+	--			y_move = 0
+	--		end
+	--	end
+	--end
+	
+	
 	local speed = abs(player.dx)
 	player.x += x_move
 	player.y += y_move
@@ -751,6 +763,7 @@ function move_player()
 				create_herlock(120, 32)
 				local box = {
 					sprite = 153,
+					y_collide = false,
 					x = 152,
 					y = 32
 				}

@@ -6,7 +6,7 @@ __lua__
 --basic set up sections
 --in the game
 
- 
+
 function _init()
 	mode = 0 --for title call
 	level= 0 --for changing levels
@@ -173,11 +173,39 @@ function herlock_shoot(startx, starty, targetx, targety)
 
 end
 
+function merlin_shoot(startx, starty, targetx, targety)
+
+	local magic_ball = {
+		"magic_ball",
+		sprite = 176,
+		speed = 1.3,
+		x = startx,
+		y = starty,
+		dx =0,
+		dy =0,
+		move_count = 0
+	}
+
+	local trajectory_x = targetx - startx
+	local trajectory_y = targety - starty
+
+	local trajectory_len = sqrt(trajectory_x^2 + trajectory_y^2)
+
+	local len_to_speed = magic_ball.speed / trajectory_len
+
+	magic_ball.dx = trajectory_x * len_to_speed
+	magic_ball.dy = trajectory_y * len_to_speed
+
+	add(danger, magic_ball)
+
+end
+
 function create_enemy(type, sprite, x, y, health, firerate)
 	local actor = {
 		type = type,
 		sprite = sprite,
 		move_count = 0,
+		move_timer = 50,
 		shoot_count = 0,
 		firerate = firerate,
 		health = health,
@@ -222,12 +250,15 @@ function create_herlock(x, y)
 end
 
 --adding a wizard function
-function create_merlin(newx, newy)
-	create_enemy("wizard",newx,newy)
+function create_merlin()
+	-- wizard is randomly moved relative to player
+	local x = (player.x - 32) + flr(rnd(64))
+	local y = (player.y - 16) + flr(rnd(64))
+	create_enemy("merlin", 98, x, y, 30, 80)
 end
 
 function create_npc(newx,newy,spri,kind)
-	local extra ={ 
+	local extra ={
 		x = newx,
 		y = newy,
 		dx = 2, --speed. not properly implemented yet
@@ -291,7 +322,7 @@ function check_push()
 		 	end
 		 end
 		end
-		
+
 		if abs(i.x - 200) <=1 then
 			mset(92, 4, 153)
 			mset(91, 8, 49)
@@ -310,7 +341,7 @@ function box_hit(item1, item2)
 	if xdiff < xs and ydiff < ys then
 		return true
 	end
-	
+
 	return false
 end
 
@@ -363,8 +394,6 @@ function move_soldier(soldier)
 end
 
 function animate_soldier(soldier)
-		soldier.move_count += 1
-
 		if (soldier.move_count % 3 == 0) then
 			soldier.sprite += 1
 			if(soldier.sprite > 19) soldier.sprite = 16
@@ -417,9 +446,6 @@ function move_herlock(herlock)
 
 	herlock.x += herlock.dx
 	herlock.y += (-1 * herlock.dy)
-
-	herlock.move_count += 1
-
 end
 
 function animate_herlock(herlock)
@@ -428,6 +454,26 @@ function animate_herlock(herlock)
 			herlock.sprite += .5
 			if(herlock.sprite > 29) herlock.sprite = 26
 		end
+end
+
+function move_merlin(merlin)
+
+ if(merlin.move_count % merlin.move_timer == 0) then
+  merlin.x = (player.x - 32) + flr(rnd(64))
+  merlin.y = (player.y - 16) + flr(rnd(64))
+ end
+
+	if(merlin.move_count % (merlin.move_timer / 2) == 0) then
+		merlin_shoot(merlin.x, merlin.y, player.x, player.y)
+	end
+
+end
+
+function animate_merlin(merlin)
+ if(merlin.move_count % 20 == 0) then
+  merlin.sprite += 1
+  if(merlin.sprite > 99) merlin.sprite = 98
+ end
 end
 
 function moving_actors()
@@ -444,6 +490,8 @@ function moving_actors()
 		local tile_left = mget((actor.x)/8+ map_x, actor.y/8 + map_y)
 		local tile_left_collidable = fget(tile_left, 0)
 
+		actor.move_count += 1
+
 		if actor.type == "soldier" then
 			move_soldier(actor)
 			animate_soldier(actor)
@@ -455,6 +503,11 @@ function moving_actors()
 			 			herlock_shoot(actor.x, actor.y, player.x, player.y)
 			end
 			animate_herlock(actor)
+		end
+
+		if actor.type == "merlin" then
+			move_merlin(actor)
+			animate_merlin(actor)
 		end
 
 	end
@@ -670,7 +723,7 @@ function move_player()
 
 	x_move = calculate_x_movement()
 	y_move = calculate_y_movement()
-	
+
 	check_push(tile_right_character, tile_left_character)
 	--for i in all(items) do
 	--	if i.y_collide then
@@ -679,8 +732,8 @@ function move_player()
 	--		end
 	--	end
 	--end
-	
-	
+
+
 	local speed = abs(player.dx)
 	player.x += x_move
 	player.y += y_move
@@ -808,13 +861,14 @@ function move_player()
  			end
  			create_herlock(98, 64)
 				create_herlock(120, 64)
-				--create_merlin(120, 16)
+				create_merlin()
+				create_merlin()
 				map_x = 36
 				map_y = 16
 				player.x = 150
 				player.y = 64
 			end
-			
+
 			if level == 5 then
 				gamewin = true
 			end
@@ -844,6 +898,16 @@ function move_player()
 		mode = 1
 	end
 
+end
+
+function animate_magic_ball(ball)
+	ball.move_count += 1
+
+	if(ball.move_count % 5 == 0) then
+	 ball.sprite += 1
+ end
+
+	if(ball.sprite > 177) ball.sprite = 176
 end
 
 function _update()
@@ -915,15 +979,21 @@ function _update()
 		e.x+=e.dx
 		e.y+=e.dy
 
-		if e.dx < 0 and tile_left_collidable then
-			del(danger, e)
-		elseif e.dx > 0 and tile_right_collidable then
-			del(danger, e)
-		elseif e.dy < 0 and tile_above_collidable then
-			del(danger, e)
-		elseif e.dy > 0 and tile_below_collidable then
-			del(danger, e)
+		if(e.sprite == 176 or e.sprite == 177) then
+			animate_magic_ball(e)
 		end
+
+		if(e.sprite != 176 and e.sprite != 177) then
+		 if e.dx < 0 and tile_left_collidable then
+			 del(danger, e)
+		 elseif e.dx > 0 and tile_right_collidable then
+			 del(danger, e)
+		 elseif e.dy < 0 and tile_above_collidable then
+			 del(danger, e)
+		 elseif e.dy > 0 and tile_below_collidable then
+			 del(danger, e)
+		 end
+	 end
 
 		if e.x<camx-128 or e.x>camx+128 or e.y<0 or e.y>128 then
 			del(danger, e)
@@ -1111,9 +1181,9 @@ if colblind == 1 then
  	if player.lives>0 then
 			spr(player.sprite, player.x, player.y+10, 1, 1, player.flipx, false)
 		end
-	
+
 		camera()
-		
+
 		site =flr(player.x/8)
 		if txtvalues(site) then
 			tutorialtext(site,player.y)
@@ -1151,7 +1221,7 @@ if colblind == 1 then
  	map(0, 0, 0, 0, 32*8, 9*8)
  	_drawmapsprites()
  	_moveextra()
- 	
+
 		if player.lives>0 then
 			spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
 		end
@@ -1165,7 +1235,7 @@ if colblind == 1 then
 		for b in all(danger) do
 			spr(b.sprite, b.x, b.y)
 		end
-		
+
 		--edits need here a1
 		for a in all(extras) do
  		spr(a.sprite,a.x,a.y,1,1,a.flipx,false)
@@ -1188,8 +1258,8 @@ if colblind == 1 then
 		print('youll be executed', 13)
 		print('tomorrow at dawn', 13)
 		print('your village gets nothing', 13)
-		
-		print('press "enter" and', 28, 40, 7) 
+
+		print('press "enter" and', 28, 40, 7)
 		print('select "reset cart"', 26, 48, 7)
 		print('to play again', 34, 56, 7)
 		spr(77,112,112,2,2) --prints execution sprite
@@ -1202,7 +1272,7 @@ if colblind == 1 then
 	if level == 3 and gameover == false then
 		level3draw()
 	end
-	
+
 	if level == 4 and gameover == false then
 		level4draw()
 	end
@@ -1265,7 +1335,7 @@ function _drawmapsprites()
 		spr(42,12*8,08*8) --table 2
 		spr(42,16*8,08*8) --table 3
 		end
-		
+
 		if level==3 then
 		pal(2,132,1)
 		spr(41,11.5*8,04*8,1,1,true,false) --booth 1
@@ -1278,7 +1348,7 @@ function _drawmapsprites()
 		spr(42,09*8,08*8) --table 1
 		spr(42,16*8,08*8) --table 2
 		end
-		
+
 		if level==4 then
 		pal(2,132,1)
 		spr(41,04*8,12*8,1,1,true,false)
@@ -1394,7 +1464,7 @@ function level2draw()
  map(36, 0, 0, 0, 32*8, 9*8)
  _drawmapsprites()
  _moveextra()
- 
+
 	if player.lives>0 then
 		spr(player.sprite, player.x, player.y, 1, 1, player.flipx, false)
 	end
@@ -1429,7 +1499,7 @@ function level3draw()
  camera(camx, -16)
  pal(13,134,1)
  drawclouds()
- 
+
  		--test this
  if colblind == 1 then
  	pal(3,130,1)--check this
@@ -1438,7 +1508,7 @@ function level3draw()
  if colblind == 0 then
  	pal()
  end
- 
+
  map(67, 0, 0, 0, 50*8, 9*8)
  if colblind == 1 then
  	pal(3,130,1)--check this
@@ -1464,7 +1534,7 @@ function level3draw()
 	for i in all(items) do
 		spr(i.sprite, i.x, i.y)
 	end
-	
+
 	camera()
 	print('health', 1, 1, 6)
 	rectfill(1,8, player.health,9,8)
@@ -1481,9 +1551,9 @@ function level4draw()
  camera(camx, -16)
  pal(13,134,1)
  drawclouds()
- 
+
  		--test this
- 
+
  map(36, 16, 0, 0, 50*8, 9*8)
  _drawmapsprites()
  if player.lives>0 then
@@ -1500,14 +1570,14 @@ function level4draw()
 		spr(b.sprite, b.x, b.y)
 	end
 	camera()
-	
-	
+
+
 	--find bext location for this bit of code
 	site =flr(player.x/8)
 	if txtvalues(site) then
 		lev4txt(site,player.y)
 	end
-	
+
 	print('health', 1, 1, 6)
 	rectfill(1,8, player.health,9,8)
 	print('lives', 40, 1, 6)
@@ -1578,7 +1648,7 @@ end
 --movement section
 function _moveextra()
 	--should be for all animations
-	for extra in all(extras) do 
+	for extra in all(extras) do
 		if extra.kind=="olady" then
 		extra.sprite+=extra.timing
 			if(extra.sprite > 66) then
@@ -1853,7 +1923,7 @@ map(110,0,0,10,14*8,20*8)
 	end ]]--
 --will call text function in here
 --text boxes have flag 4
-	
+
 end
 
 --formatting for printing tutorial etc?
@@ -1873,7 +1943,7 @@ function txtvalues(site)
 	if flr(site)==2 then
 		siter = true
 	end
-	if flr(site)==6 then	
+	if flr(site)==6 then
 		siter = true
 	end
 	if  flr(site)==11 then
@@ -1993,10 +2063,10 @@ ddd55dd55ddddddd44444444d6dddd6d444444444444464444444444444444443999999354444445
 000000000000000079555597700009974aaaaaa47555599779555597d999999dd444444d00000000000000000000000000000000000000000000000000000000
 00000000000000007999999770000997000000007555599779999997000000000000000000000000000000000000000000000000000000000000000000000000
 000000000000000075999997700005970000000075555597759999970a0000000000000a00000000070000000000000000000000000000000000000000000000
-0000000000000000759999977000059700000000755555977599999700000000000a000000000070000000000000000000000000000000000000000001555555
-00000000000000007999999770000997000000007555599779999997000000a0000000000000000000000a000000000000000000000000000000000004111150
-000000000000000079999997700009970000000075555997755555570000000000000000000000000000aaa00000000000000000000000000000000044500000
-000000000000000079999997700009970000000075555997755555570000a00000000a000700000000000a000000000000000000000000000000000044000000
+00011000000cc000759999977000059700000000755555977599999700000000000a000000000070000000000000000000000000000000000000000001555555
+001cc10000c77c007999999770000997000000007555599779999997000000a0000000000000000000000a000000000000000000000000000000000004111150
+001cc10000c77c0079999997700009970000000075555997755555570000000000000000000000000000aaa00000000000000000000000000000000044500000
+00011000000cc00079999997700009970000000075555997755555570000a00000000a000700000000000a000000000000000000000000000000000044000000
 00000000000000007999999770000997000000007555599779999997000000000a000000000000a0000000000000000000000000000000000000000000000000
 00000000000000007999999770000097000000007555599779999997000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -2207,4 +2277,3 @@ __music__
 00 00424344
 00 00424344
 00 00424344
-

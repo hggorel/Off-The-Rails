@@ -807,7 +807,6 @@ function move_player()
  	end
  	if tile_character_on ==61 or tile_character_on == 179 then
  		level+=1
-			level = 4
  		sfx(03)
  		if (level==1) then
  			mset(3,5,50)

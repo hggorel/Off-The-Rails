@@ -178,7 +178,7 @@ function merlin_shoot(startx, starty, targetx, targety)
 	local magic_ball = {
 		"magic_ball",
 		sprite = 176,
-		speed = 1.3,
+		speed = 2,
 		x = startx,
 		y = starty,
 		dx =0,
@@ -205,7 +205,7 @@ function create_enemy(type, sprite, x, y, health, firerate)
 		type = type,
 		sprite = sprite,
 		move_count = 0,
-		move_timer = 50,
+		move_timer = 100,
 		shoot_count = 0,
 		firerate = firerate,
 		health = health,
@@ -252,8 +252,8 @@ end
 --adding a wizard function
 function create_merlin()
 	-- wizard is randomly moved relative to player
-	local x = (player.x - 32) + flr(rnd(64))
-	local y = (player.y - 16) + flr(rnd(64))
+	local x = flr(rnd(128)) + camx
+	local y = 0 + flr(rnd(112))
 	create_enemy("merlin", 98, x, y, 30, 80)
 end
 
@@ -459,11 +459,22 @@ end
 function move_merlin(merlin)
 
  if(merlin.move_count % merlin.move_timer == 0) then
-  merlin.x = (player.x - 32) + flr(rnd(64))
-  merlin.y = (player.y - 16) + flr(rnd(64))
+		local trajectory_len = 0
+
+		while(not (trajectory_len > 10 and trajectory_len < 72)) do
+  merlin.x = flr(rnd(128)) + camx
+  merlin.y = flr(rnd(112))
+
+		local trajectory_x = merlin.x - player.x
+		local trajectory_y = merlin.y - player.y
+
+		trajectory_len = sqrt(trajectory_x^2 + trajectory_y^2)
+
+	 end
+
  end
 
-	if(merlin.move_count % (merlin.move_timer / 2) == 0) then
+	if(merlin.move_count % flr((merlin.move_timer / 3)) == 30) then
 		merlin_shoot(merlin.x, merlin.y, player.x, player.y)
 	end
 
@@ -796,6 +807,7 @@ function move_player()
  	end
  	if tile_character_on ==61 or tile_character_on == 179 then
  		level+=1
+			level = 4
  		sfx(03)
  		if (level==1) then
  			mset(3,5,50)
@@ -862,7 +874,6 @@ function move_player()
  			create_herlock(98, 64)
 				create_herlock(120, 64)
 				create_merlin()
-				create_merlin()
 				map_x = 36
 				map_y = 16
 				player.x = 150
@@ -903,7 +914,7 @@ end
 function animate_magic_ball(ball)
 	ball.move_count += 1
 
-	if(ball.move_count % 5 == 0) then
+	if(ball.move_count % 4 == 0) then
 	 ball.sprite += 1
  end
 

@@ -241,7 +241,7 @@ function create_npc(newx,newy,spri,kind)
 	add(extras,extra)
 end
 
-function flip_switch(right_tile, left_tile)
+function flip_left_switch(right_tile, left_tile)
 	if right_tile == 136 then
 		mset((player.x+8)/8+map_x, player.y/8+map_y, 137)
 		mset(41, 7, 151)
@@ -252,6 +252,16 @@ function flip_switch(right_tile, left_tile)
 		mset(42, 1, 132)
 		mset(43, 1, 132)
 		mset(44, 1, 132)
+	end
+end
+
+function flip_right_switch(right_tile, left_tile)
+	if right_tile == 137 then
+		mset((player.x+8)/8+map_x, player.y/8+map_y, 136)
+		mset(62, 21, 128)
+		mset(63, 21, 129)
+		mset(62, 22, 144)
+		mset(63, 22, 145)
 	end
 end
 
@@ -640,7 +650,12 @@ function move_player()
 	local tile_right_collidable = fget(tile_right_character, 0)
 	local tile_left_character = mget((player.x)/8+map_x, player.y/8 + map_y)
 	local tile_left_collidable = fget(tile_left_character, 0)
-	flip_switch(tile_right_character, tile_left_character)
+	if level == 2 then
+		flip_left_switch(tile_right_character, tile_left_character)
+	end
+	if level == 4 then
+		flip_right_switch(tile_right_character, tile_left_character)
+	end
 	grab_suitcase(tile_left_character)
 
 	x_move = calculate_x_movement()
@@ -1066,7 +1081,7 @@ function gamedraw()
 	--will need to readjust levels for tutorial map
 	if level==0 and levelwin==false and gameover==false then
 		cls(5)
- 	camera(camx, -20)
+ 	camera(camx, -16)
  	map_x = 110
  	drawclouds()
 
